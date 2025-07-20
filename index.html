@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cita Rasa Indo Catering - Order Dashboard</title>
+    <title>CRI Catering - Order Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -67,14 +67,6 @@
             margin: 0;
             display: flex;
             align-items: center;
-        }
-        header img {
-            width: 50px;
-            height: 50px;
-            margin-right: 1rem;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px #3b2323;
-            background: #fff;
         }
         nav {
             display: flex;
@@ -367,12 +359,6 @@
             color: white;
             box-shadow: 0 2px 12px rgba(60, 20, 20, 0.15);
         }
-        .footer-logo {
-            max-width: 60px;
-            margin-bottom: 0.7rem;
-            border-radius: 50%;
-            border: 1px solid var(--primary);
-        }
         .detailed-list {
             font-size: 0.98rem;
             margin-top: 0.2rem;
@@ -438,13 +424,100 @@
             display: flex;
             gap: 0.4rem;
         }
+        .edit-mode-bar {
+            background: #ffe1c2;
+            border-radius: var(--radius);
+            padding: 0.9rem 1.6rem;
+            margin-bottom: 1.1rem;
+            box-shadow: 0 2px 12px rgba(60,20,20,0.12);
+            border: 2px solid #ff6d1a;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        .edit-mode-bar strong {
+            color: #e65100;
+            font-size: 1.13rem;
+        }
+        .edit-mode-bar .edit-bar-btns {
+            display: flex;
+            gap: 0.8rem;
+        }
+        .floating-bottom-btn {
+            position: fixed;
+            left: 50%;
+            bottom: 38px;
+            transform: translateX(-50%);
+            z-index: 999;
+            box-shadow: 0 4px 24px rgba(60,20,20,0.15);
+            padding: 0.85rem 2.3rem;
+            font-size: 1.13rem;
+        }
+        .floating-bottom-btn.hide {
+            display: none;
+        }
+        @media (max-width: 600px) {
+            .floating-bottom-btn {
+                font-size: 0.97rem;
+                padding: 0.7rem 1.3rem;
+                bottom: 16px;
+            }
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(60,20,20,0.16);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .modal {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 32px rgba(60,20,20,0.20);
+            padding: 2rem 2.2rem;
+            min-width: 320px;
+            max-width: 95vw;
+            border: 1.5px solid var(--primary);
+        }
+        .modal-title {
+            font-size: 1.32rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .modal-summary-details {
+            font-size: 1.08rem;
+            margin-bottom: 1.1rem;
+        }
+        .modal-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        @media (max-width: 600px) {
+            .modal { padding: 1rem 0.7rem; min-width: 220px; }
+            .modal-title { font-size: 1.02rem; }
+            .modal-summary-details { font-size: 0.97rem; }
+            .modal-total { font-size: 1.05rem; }
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="logo-title">
-            <img src="https://i.imgur.com/IOGuY5b.png" alt="Cita Rasa Indo Logo">
-            <h1>Cita Rasa Indo Catering Admin</h1>
+            <h1>CRI Catering Admin</h1>
         </div>
         <nav>
             <button id="nav-admin" class="nav-btn active"><i class="fas fa-user-cog"></i> Admin Dashboard</button>
@@ -452,10 +525,30 @@
         </nav>
     </header>
     <div class="notification" id="notification"></div>
+    <!-- MODAL Order Summary -->
+    <div class="modal-overlay" id="order-summary-modal">
+        <div class="modal">
+            <div class="modal-title"><i class="fas fa-file-alt"></i> Konfirmasi Order Sebelum Kirim ke Kitchen</div>
+            <div class="modal-summary-details" id="modal-summary-details"></div>
+            <div class="modal-total" id="modal-summary-total"></div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="modal-edit-btn"><i class="fas fa-edit"></i> Edit Order</button>
+                <button class="btn" id="modal-send-btn"><i class="fas fa-paper-plane"></i> Kirim ke Kitchen</button>
+            </div>
+        </div>
+    </div>
     <main class="container">
         <!-- Admin Dashboard Section -->
         <section id="admin-section" class="section card active">
             <div class="section-title"><i class="fas fa-user-cog"></i> Admin Dashboard - Input Order</div>
+            <div id="edit-mode-bar" class="edit-mode-bar" style="display:none;">
+                <strong>Edit Order Mode</strong>
+                <span>You are editing order <span id="edit-order-id-bar"></span>. Make changes and click "Submit" to save, or "Cancel Edit" to discard changes.</span>
+                <div class="edit-bar-btns">
+                    <button class="btn" id="edit-order-save-btn">Submit Edit</button>
+                    <button class="btn btn-secondary" id="edit-order-cancel-btn">Cancel Edit</button>
+                </div>
+            </div>
             <form id="order-form">
                 <div class="form-row">
                     <div class="form-group">
@@ -483,8 +576,11 @@
                     <label for="order-notes">Additional Notes / Instructions (optional)</label>
                     <textarea id="order-notes" rows="2"></textarea>
                 </div>
-                <button type="submit" class="btn" id="send-to-kitchen-btn">Send to Kitchen</button>
+                <button type="submit" class="btn" id="send-to-kitchen-btn" style="display:none;">Send to Kitchen</button>
             </form>
+            <button type="button" class="btn floating-bottom-btn" id="floating-send-to-kitchen-btn">
+                <i class="fas fa-paper-plane"></i> Send to Kitchen
+            </button>
             <div class="divider"></div>
             <div class="section-title"><i class="fas fa-list"></i> Orders to Kitchen</div>
             <div class="order-group" id="admin-orders-pending">
@@ -664,18 +760,13 @@
         </section>
     </main>
     <footer class="footer">
-        <img src="https://i.imgur.com/IOGuY5b.png" alt="Logo Cita Rasa Indo" class="footer-logo">
-        <br>
-        &copy; 2025 Cita Rasa Indo | <a href="https://t.me/CriFood" target="_blank" style="color: #ff6d1a;">Telegram Channel</a>
+        &copy; 2025 CRI | <a href="https://t.me/CriFood" target="_blank" style="color: #ff6d1a;">Telegram Channel</a>
         <div class="footer-buttons">
             <button id="footer-reports" class="footer-btn"><i class="fas fa-file-excel"></i> Reports & Export</button>
             <button id="footer-menu" class="footer-btn"><i class="fas fa-book"></i> Menu Management</button>
         </div>
     </footer>
     <script>
-        // Full JavaScript from your original file, unchanged, including Firebase, Day.js, all rendering, actions, Telegram, etc.
-
-        // --- Firebase Init ---
         const firebaseConfig = {
             apiKey: "AIzaSyBoDQI5RgVlDOgYfs4qBIEjJPEBJG_rSJU",
             authDomain: "cita-rasa-indo.firebaseapp.com",
@@ -691,11 +782,13 @@
         dayjs.extend(dayjs_plugin_utc);
         dayjs.extend(dayjs_plugin_timezone);
 
-        const DEFAULT_TZ = 'Asia/Bangkok'; // Thailand time zone
+        const DEFAULT_TZ = 'Asia/Bangkok';
 
         const defaultMenuSeed = [
-            {id:"package_payalur", type:"package", name:"PAYALUR", desc:"Nasi Putih dan Ayam Goreng + Telur Balado + Bakwan Sayur atau Kentang Balado + Sayur dan Sambal", price:35},
-            {id:"package_payalit", type:"package", name:"PAYALIT", desc:"Nasi Putih dan Ayam Goreng + Telur atau Bakwan Sayur + Sayur dan Sambal", price:30},
+            {id:"package_payalur_bakwan", type:"package", name:"PAYALUR", desc:"Nasi Putih dan Ayam Goreng + Telur Balado + Bakwan Sayur + Sayur dan Sambal", price:35},
+            {id:"package_payalur_kentang", type:"package", name:"PAYALUR", desc:"Nasi Putih dan Ayam Goreng + Telur Balado + Kentang Balado + Sayur dan Sambal", price:35},
+            {id:"package_payalit_telur", type:"package", name:"PAYALIT", desc:"Nasi Putih dan Ayam Goreng + Telur + Sayur dan Sambal", price:30},
+            {id:"package_payalit_bakwan", type:"package", name:"PAYALIT", desc:"Nasi Putih dan Ayam Goreng + Bakwan Sayur + Sayur dan Sambal", price:30},
             {id:"package_payamat", type:"package", name:"PAYAMAT", desc:"Nasi Putih dan Ayam Goreng + Sayur dan Sambal", price:25},
             {id:"package_palutang", type:"package", name:"PALUTANG", desc:"Nasi Putih dan Telur Balado + Kentang Balado + Bakwan Sayur + Sayur", price:25},
             {id:"package_palur", type:"package", name:"PALUR", desc:"Nasi Putih dan Telur Balado + Bakwan Sayur + Sayur", price:20},
@@ -710,18 +803,33 @@
             {id:"alacarte_tahu", type:"alacarte", name:"Tahu", desc:"Ala Carte", price:5},
         ];
         const menuDetails = {
-            'PAYALUR': [
+            'PAYALUR BAKWAN': [
                 'Nasi Putih',
                 'Ayam Goreng',
                 'Telur Balado',
                 'Bakwan Sayur atau Kentang Balado',
                 'Sayur',
                 'Sambal'
-            ],
-            'PAYALIT': [
+            ],{
+            'PAYALUR': [
                 'Nasi Putih',
                 'Ayam Goreng',
-                'Telur atau Bakwan Sayur',
+                'Telur Balado',
+                'Kentang Balado',
+                'Sayur',
+                'Sambal'
+            ],
+            'PAYALIT TELUR': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Telur Balado',
+                'Sayur',
+                'Sambal'
+            ],
+            'PAYALIT BAKWAN': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Bakwan Sayur',
                 'Sayur',
                 'Sambal'
             ],
@@ -785,7 +893,6 @@
         let telegramSentIds = new Set();
         let menuSeeded = false;
 
-        // --- SEED MENU ON FIRST LOAD ---
         async function seedMenuIfNeeded() {
             const snap = await db.collection('menu').get();
             if (snap.empty) {
@@ -798,7 +905,6 @@
         }
         seedMenuIfNeeded();
 
-        // --- Helper Functions ---
         function showNotification(msg, duration = 2500) {
             const notif = document.getElementById('notification');
             notif.innerText = msg;
@@ -854,6 +960,7 @@
             window.scrollTo(0,0);
             renderAdminOrders();
             renderKitchenOrders();
+            handleFloatingBtnVisibility();
         }
         document.getElementById('nav-admin').onclick = function() {
             showSection('admin-section');
@@ -877,6 +984,7 @@
             document.getElementById(navId).classList.add('active');
             document.getElementById('footer-reports').classList.remove('active');
             document.getElementById('footer-menu').classList.remove('active');
+            handleFloatingBtnVisibility();
         }
         function setFooterActive(footerId) {
             document.getElementById('footer-reports').classList.remove('active');
@@ -884,9 +992,9 @@
             document.getElementById(footerId).classList.add('active');
             document.getElementById('nav-admin').classList.remove('active');
             document.getElementById('nav-kitchen').classList.remove('active');
+            handleFloatingBtnVisibility();
         }
 
-        // --- Plus-Minus Qty for Menu ---
         window.changeQty = function(inputId, delta) {
             const input = document.getElementById(inputId);
             const display = document.getElementById(inputId + '_display');
@@ -906,7 +1014,6 @@
                     <div class="menu-item">
                         <div class="menu-item-title">${mi.name}</div>
                         <div class="menu-item-price">¥${mi.price}</div>
-                        <div class="menu-item-desc">${mi.desc}</div>
                         <ul class="detailed-list">
                             ${menuDetails[mi.name] ? menuDetails[mi.name].map(i => `<li>${i}</li>`).join('') : ''}
                         </ul>
@@ -1012,7 +1119,11 @@
                 for (const pkg of ord.packages) {
                     const mi = menuItems.find(m => m.id === pkg.menuId);
                     if (mi) {
-                        html += `<li><b>${mi.name} x${pkg.qty}</b></li>`;
+                        html += `<li><b>${mi.name} x${pkg.qty}</b>`;
+                        if (menuDetails[mi.name]) {
+                            html += `<ul class="detailed-list">${menuDetails[mi.name].map(i=>`<li>${i}</li>`).join('')}</ul>`;
+                        }
+                        html += `</li>`;
                     }
                 }
                 html += `</ul>`;
@@ -1090,34 +1201,55 @@
             if (ord.completedAt) logs.push(`Completed: ${formatDateTime(ord.completedAt)}`);
             return logs.join('<br>');
         }
-        window.handleKitchenAction = async function(orderId, newStatus, btn) {
-            btn.classList.add('pop');
-            setTimeout(()=>btn.classList.remove('pop'), 370);
+
+        // --- Edit Order Mode ---
+        let editOrderMode = false;
+        let editOrderId = null;
+        let previousOrderData = null;
+        function showEditModeBar(orderId) {
+            document.getElementById('edit-mode-bar').style.display = 'flex';
+            document.getElementById('edit-order-id-bar').innerText = orderId;
+            document.getElementById('send-to-kitchen-btn').style.display = 'none';
+            document.getElementById('floating-send-to-kitchen-btn').classList.add('hide');
+            document.getElementById('order-form').querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+        }
+        function hideEditModeBar() {
+            document.getElementById('edit-mode-bar').style.display = 'none';
+            document.getElementById('send-to-kitchen-btn').style.display = '';
+            editOrderMode = false;
+            editOrderId = null;
+            previousOrderData = null;
+            document.getElementById('order-form').reset();
+            setDefaultDeliveryTime();
+            renderMenus();
+            handleFloatingBtnVisibility();
+        }
+        window.editOrder = function(orderId) {
             const ord = orders.find(o => o.id === orderId);
-            if (!ord) return;
-            let updateObj = { status: newStatus };
-            updateObj[`${newStatus.toLowerCase()}At`] = firebase.firestore.FieldValue.serverTimestamp();
-            if (newStatus === 'Completed') {
-                updateObj.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+            if (!ord) return showNotification('Order not found!');
+            if (ord.status !== "Pending") return showNotification('Order hanya bisa diedit saat status Pending!');
+            editOrderMode = true;
+            editOrderId = orderId;
+            previousOrderData = JSON.parse(JSON.stringify(ord));
+            showEditModeBar(orderId);
+            document.getElementById('customer-name').value = ord.customer;
+            document.getElementById('delivery-location').value = ord.deliveryLocation;
+            document.getElementById('order-notes').value = ord.notes || '';
+            let dtLocal = dayjs.utc(ord.deliveryTime).tz(DEFAULT_TZ).format('HH:mm');
+            document.getElementById('delivery-time').value = dtLocal;
+            for (const mi of menuItems.filter(m=>m.type==='package')) {
+                const pkg = ord.packages.find(p=>p.menuId===mi.id);
+                document.getElementById(`pkg_${mi.id}_qty`).value = pkg ? pkg.qty : 0;
+                document.getElementById(`pkg_${mi.id}_qty_display`).innerText = pkg ? pkg.qty : 0;
             }
-            await db.collection('orders').doc(orderId).update(updateObj);
-            showNotification(`Order ${orderId} status updated to ${newStatus}`);
-            if (newStatus === "Ready") {
-                sendTelegram(orderId);
+            for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
+                const ac = ord.alacarte.find(a=>a.menuId===mi.id);
+                document.getElementById(`ac_${mi.id}_qty`).value = ac ? ac.qty : 0;
+                document.getElementById(`ac_${mi.id}_qty_display`).innerText = ac ? ac.qty : 0;
             }
         };
-
-        function setDefaultDeliveryTime() {
-            const input = document.getElementById('delivery-time');
-            if (!input) return;
-            const now = dayjs().tz(DEFAULT_TZ);
-            const pad = n => String(n).padStart(2, '0');
-            input.value = `${pad(now.hour())}:${pad(now.minute())}`;
-        }
-        document.addEventListener('DOMContentLoaded', setDefaultDeliveryTime);
-
-        document.getElementById('order-form').onsubmit = async function(e) {
-            e.preventDefault();
+        document.getElementById('edit-order-save-btn').onclick = async function() {
+            if (!editOrderMode || !editOrderId) return;
             const customer = document.getElementById('customer-name').value.trim();
             const deliveryTimeInput = document.getElementById('delivery-time').value;
             const deliveryLocation = document.getElementById('delivery-location').value.trim();
@@ -1136,18 +1268,137 @@
                 showNotification('Please fill all required fields and select items.');
                 return;
             }
-            // Delivery time = today's date + input time
             const now = dayjs().tz(DEFAULT_TZ);
             const deliveryTime = dayjs.tz(`${now.format('YYYY-MM-DD')}T${deliveryTimeInput}`, DEFAULT_TZ).utc().toISOString();
-            const oid = `ORD_${Date.now().toString().slice(-8)}`;
             const order = {
-                id: oid,
+                id: editOrderId,
                 customer,
                 deliveryTime: deliveryTime,
                 deliveryLocation,
                 notes,
                 packages,
                 alacarte,
+                status: 'Pending',
+                createdAt: previousOrderData.createdAt,
+                kitchenNotes: previousOrderData.kitchenNotes || []
+            };
+            await db.collection('orders').doc(editOrderId).set(order);
+            showNotification('Order edited successfully!');
+            hideEditModeBar();
+        };
+        document.getElementById('edit-order-cancel-btn').onclick = function() {
+            hideEditModeBar();
+            showNotification('Edit cancelled, no changes applied.');
+        };
+
+        window.cancelOrder = function(orderId) {
+            if (editOrderMode && editOrderId === orderId) {
+                hideEditModeBar();
+                showNotification('Edit cancelled, no changes applied.');
+                return;
+            }
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return showNotification('Order not found!');
+            if (ord.status !== "Pending") return showNotification('Order hanya bisa dibatalkan saat status Pending!');
+            db.collection('orders').doc(orderId).delete();
+            showNotification('Order dibatalkan!');
+        };
+
+        function setDefaultDeliveryTime() {
+            const input = document.getElementById('delivery-time');
+            if (!input) return;
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            input.value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        }
+        document.addEventListener('DOMContentLoaded', setDefaultDeliveryTime);
+
+        document.getElementById('floating-send-to-kitchen-btn').onclick = function() {
+            if (editOrderMode) return;
+            showOrderSummaryModal();
+        };
+        function handleFloatingBtnVisibility() {
+            var btn = document.getElementById('floating-send-to-kitchen-btn');
+            var adminSectionActive = document.getElementById('admin-section').classList.contains('active');
+            if (adminSectionActive && !editOrderMode) {
+                btn.classList.remove('hide');
+            } else {
+                btn.classList.add('hide');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', handleFloatingBtnVisibility);
+
+        // ---- MODAL ORDER SUMMARY PATCH ----
+        function showOrderSummaryModal() {
+            const customer = document.getElementById('customer-name').value.trim();
+            const deliveryTimeInput = document.getElementById('delivery-time').value;
+            const deliveryLocation = document.getElementById('delivery-location').value.trim();
+            const notes = document.getElementById('order-notes').value.trim();
+            const now = dayjs().tz(DEFAULT_TZ);
+            const deliveryTime = dayjs.tz(`${now.format('YYYY-MM-DD')}T${deliveryTimeInput}`, DEFAULT_TZ).utc().toISOString();
+            const packages = [];
+            for (const mi of menuItems.filter(m=>m.type==='package')) {
+                const qty = Number(document.getElementById(`pkg_${mi.id}_qty`).value);
+                if (qty > 0) packages.push({menuId: mi.id, qty});
+            }
+            const alacarte = [];
+            for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
+                const qty = Number(document.getElementById(`ac_${mi.id}_qty`).value);
+                if (qty > 0) alacarte.push({menuId: mi.id, qty});
+            }
+            if (!customer || !deliveryTimeInput || !deliveryLocation || (!packages.length && !alacarte.length)) {
+                showNotification('Please fill all required fields and select items.');
+                return;
+            }
+            let html = `<b>Customer:</b> ${customer}<br>`;
+            html += `<b>Delivery Location:</b> ${deliveryLocation}<br>`;
+            html += `<b>Delivery Time:</b> ${dayjs(deliveryTime).tz(DEFAULT_TZ).format('YYYY-MM-DD HH:mm')}<br>`;
+            if (packages.length > 0) {
+                html += `<b>Package:</b><ul class="detailed-list">`;
+                for (const pkg of packages) {
+                    const mi = menuItems.find(m => m.id === pkg.menuId);
+                    if (mi) {
+                        html += `<li><b>${mi.name} x${pkg.qty}</b>`;
+                        if (menuDetails[mi.name]) {
+                            html += `<ul class="detailed-list">${menuDetails[mi.name].map(i=>`<li>${i}</li>`).join('')}</ul>`;
+                        }
+                        html += `</li>`;
+                    }
+                }
+                html += `</ul>`;
+            }
+            if (alacarte.length > 0) {
+                html += `<b>Ala Carte:</b><ul class="detailed-list">`;
+                for (const ac of alacarte) {
+                    const mi = menuItems.find(m => m.id === ac.menuId);
+                    if (mi) {
+                        html += `<li>${mi.name} x${ac.qty}</li>`;
+                    }
+                }
+                html += `</ul>`;
+            }
+            html += `<b>Notes:</b> ${notes || '-'}`;
+            document.getElementById('modal-summary-details').innerHTML = html;
+            document.getElementById('modal-summary-total').innerHTML = `<span>Total Pembayaran: <b>¥${calcOrderTotal({packages,alacarte})}</b></span>`;
+            document.getElementById('order-summary-modal').style.display = 'flex';
+
+            window.__orderSummaryTemp = {customer,deliveryTime,deliveryLocation,notes,packages,alacarte};
+        }
+        document.getElementById('modal-edit-btn').onclick = function() {
+            document.getElementById('order-summary-modal').style.display = 'none';
+        };
+        document.getElementById('modal-send-btn').onclick = async function() {
+            const temp = window.__orderSummaryTemp;
+            if (!temp) return;
+            const oid = `ORD_${Date.now().toString().slice(-8)}`;
+            const order = {
+                id: oid,
+                customer: temp.customer,
+                deliveryTime: temp.deliveryTime,
+                deliveryLocation: temp.deliveryLocation,
+                notes: temp.notes,
+                packages: temp.packages,
+                alacarte: temp.alacarte,
                 status: 'Pending',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 kitchenNotes: []
@@ -1157,36 +1408,33 @@
             document.getElementById('order-form').reset();
             setDefaultDeliveryTime();
             renderMenus();
+            document.getElementById('order-summary-modal').style.display = 'none';
+        };
+        document.getElementById('order-summary-modal').onclick = function(e) {
+            if (e.target === this) this.style.display = 'none';
         };
 
-        window.editOrder = function(orderId) {
-            const ord = orders.find(o => o.id === orderId);
-            if (!ord) return showNotification('Order not found!');
-            if (ord.status !== "Pending") return showNotification('Order hanya bisa diedit saat status Pending!');
-            document.getElementById('customer-name').value = ord.customer;
-            document.getElementById('delivery-location').value = ord.deliveryLocation;
-            document.getElementById('order-notes').value = ord.notes || '';
-            let dtLocal = dayjs.utc(ord.deliveryTime).tz(DEFAULT_TZ).format('HH:mm');
-            document.getElementById('delivery-time').value = dtLocal;
-            for (const mi of menuItems.filter(m=>m.type==='package')) {
-                const pkg = ord.packages.find(p=>p.menuId===mi.id);
-                document.getElementById(`pkg_${mi.id}_qty`).value = pkg ? pkg.qty : 0;
-                document.getElementById(`pkg_${mi.id}_qty_display`).innerText = pkg ? pkg.qty : 0;
-            }
-            for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
-                const ac = ord.alacarte.find(a=>a.menuId===mi.id);
-                document.getElementById(`ac_${mi.id}_qty`).value = ac ? ac.qty : 0;
-                document.getElementById(`ac_${mi.id}_qty_display`).innerText = ac ? ac.qty : 0;
-            }
-            db.collection('orders').doc(orderId).delete();
-            showNotification('Edit order: silakan submit ulang, order lama akan dihapus.');
+        document.getElementById('order-form').onsubmit = function(e) {
+            e.preventDefault();
+            if (editOrderMode) return;
+            showOrderSummaryModal();
         };
-        window.cancelOrder = function(orderId) {
+
+        window.handleKitchenAction = async function(orderId, newStatus, btn) {
+            btn.classList.add('pop');
+            setTimeout(()=>btn.classList.remove('pop'), 370);
             const ord = orders.find(o => o.id === orderId);
-            if (!ord) return showNotification('Order not found!');
-            if (ord.status !== "Pending") return showNotification('Order hanya bisa dibatalkan saat status Pending!');
-            db.collection('orders').doc(orderId).delete();
-            showNotification('Order dibatalkan!');
+            if (!ord) return;
+            let updateObj = { status: newStatus };
+            updateObj[`${newStatus.toLowerCase()}At`] = firebase.firestore.FieldValue.serverTimestamp();
+            if (newStatus === 'Completed') {
+                updateObj.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+            await db.collection('orders').doc(orderId).update(updateObj);
+            showNotification(`Order ${orderId} status updated to ${newStatus}`);
+            if (newStatus === "Ready") {
+                sendTelegram(orderId);
+            }
         };
 
         document.getElementById('export-excel-btn').onclick = function() {
@@ -1270,7 +1518,7 @@
             const doc = new jsPDF();
             doc.setFont('helvetica','bold');
             doc.setFontSize(18);
-            doc.text('Cita Rasa Indo Catering Invoice', 20, 20);
+            doc.text('CRI Catering Invoice', 20, 20);
             doc.setFontSize(12);
             doc.setFont('helvetica','normal');
             doc.text(`Invoice ID: INV_${orderId}`, 20, 30);
@@ -1371,6 +1619,7 @@
             renderAdminOrders();
             renderKitchenOrders();
             renderInvoicesTable();
+            handleFloatingBtnVisibility();
         }
         initialLoad();
     </script>
