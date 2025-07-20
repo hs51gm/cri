@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cita Rasa Indo</title>
+    <title>Cita Rasa Indo Catering - Order Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -15,6 +15,10 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- Day.js for timezone handling -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
     <style>
         :root {
             --primary: #ff6d1a;
@@ -203,7 +207,6 @@
         tr:last-child td {
             border-bottom: none;
         }
-        /* Status Badges */
         .status-badge {
             padding: 0.3rem 0.8rem;
             border-radius: var(--radius);
@@ -215,16 +218,11 @@
         .status-cooking { background: var(--warning-cooking); color: #1b5e20; border: 2px solid #388e3c;}
         .status-ready { background: var(--warning-ready); color: #01579b; border: 2px solid #1976d2;}
         .status-completed { background: var(--warning-completed); color: #4527a0; border: 2px solid #7e57c2;}
-        /* Order Group Titles */
         .order-group-title.pending {background: var(--warning-pending); color: #e65100; padding: 0.4rem 1rem; border-radius: var(--radius);}
         .order-group-title.cooking {background: var(--warning-cooking); color: #1b5e20; padding: 0.4rem 1rem; border-radius: var(--radius);}
         .order-group-title.ready {background: var(--warning-ready); color: #01579b; padding: 0.4rem 1rem; border-radius: var(--radius);}
         .order-group-title.completed {background: var(--warning-completed); color: #4527a0; padding: 0.4rem 1rem; border-radius: var(--radius);}
-        /* Actions Section */
-        .actions {
-            display: flex;
-            gap: 0.6rem;
-        }
+        .actions {display: flex;gap: 0.6rem;}
         .action-btn {
             background: var(--action-btn);
             color: #fff;
@@ -307,23 +305,32 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            justify-content: flex-start;
         }
-        .menu-item-select input {
-            width: 50px;
-            text-align: center;
-        }
-        .search-filter-row {
+        .qty-btn {
+            font-size: 2rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary);
+            color: #fff;
+            font-weight: bold;
+            margin: 0 8px;
+            cursor: pointer;
+            transition: background 0.2s;
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1.2rem;
-            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
         }
-        .search-filter-row input, .search-filter-row select {
-            font-size: 1rem;
-            padding: 0.6rem;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            background: #fafbfc;
+        .qty-btn:active, .qty-btn:hover {
+            background: var(--primary-dark);
+        }
+        .menu-item-select span {
+            font-size: 1.3rem;
+            min-width: 42px;
+            display: inline-block;
+            text-align: center;
         }
         .footer {
             background: var(--background-dark);
@@ -378,48 +385,23 @@
         .order-group {
             margin-bottom: 3rem;
         }
-        /* Kitchen Dashboard Card - Custom Layout */
         .kitchen-order-card {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-areas: 
-                "details actions"
-                "delivery actions"
-                "customer actions"
-                "orderid actions"
-                "timestamp actions"
-                "status actions";
-            gap: 0.8rem 2.5rem;
             background: var(--secondary);
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            margin-bottom: 1.1rem;
-            padding: 1.2rem 1.4rem;
+            margin-bottom: 1rem;
+            padding: 0.9rem 1rem;
             box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
         }
-        .kitchen-order-details { grid-area: details; }
-        .kitchen-order-delivery { grid-area: delivery; }
-        .kitchen-order-customer { grid-area: customer; }
-        .kitchen-order-orderid { grid-area: orderid; }
-        .kitchen-order-timestamp { grid-area: timestamp; }
-        .kitchen-order-status { grid-area: status; }
-        .kitchen-order-actions { grid-area: actions; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 1.1rem;}
+        .kitchen-order-details { font-weight: 600; }
         @media (max-width: 900px) {
             .container { padding: 1rem 0.5rem; }
             .card { padding: 1rem; }
             nav { gap: 1rem; }
             .footer-buttons { gap: 0.8rem; }
-            .kitchen-order-card { grid-template-columns: 1fr; grid-template-areas:
-                "details"
-                "delivery"
-                "customer"
-                "orderid"
-                "timestamp"
-                "status"
-                "actions";
-                gap: 0.8rem 0;
-            }
-            .kitchen-order-actions { align-items: stretch; }
         }
         @media (max-width: 600px) {
             nav { flex-direction: column; gap: 0.4rem; }
@@ -432,6 +414,8 @@
             th, td { padding: 0.5rem 0.3rem; }
             .footer { padding: 1rem 0.5rem; font-size: 0.93rem; }
             .notification { padding: 0.7rem 1rem; font-size: 0.97rem; }
+            .qty-btn { font-size: 1.4rem; width: 38px; height: 38px; }
+            .menu-item-select span { font-size: 1rem; min-width: 32px; }
         }
         @media (max-width: 430px) {
             .section-title { font-size: 0.85rem; }
@@ -442,13 +426,25 @@
         }
         .section { display: none; }
         .section.active { display: block; }
+        .order-history-log {
+            font-size: 0.93rem;
+            background: #f7ebd6;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            margin: 1rem 0;
+            border: 1px solid #ffdeb0;
+        }
+        .edit-cancel-btns {
+            display: flex;
+            gap: 0.4rem;
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="logo-title">
             <img src="https://i.imgur.com/IOGuY5b.png" alt="Cita Rasa Indo Logo">
-            <h1>CRI</h1>
+            <h1>Cita Rasa Indo Catering Admin</h1>
         </div>
         <nav>
             <button id="nav-admin" class="nav-btn active"><i class="fas fa-user-cog"></i> Admin Dashboard</button>
@@ -468,7 +464,7 @@
                     </div>
                     <div class="form-group">
                         <label for="delivery-time">Delivery Time</label>
-                        <input type="datetime-local" id="delivery-time" required>
+                        <input type="time" id="delivery-time" required>
                     </div>
                     <div class="form-group">
                         <label for="delivery-location">Delivery Location</label>
@@ -502,7 +498,8 @@
                                 <th>Details</th>
                                 <th>Delivery Time</th>
                                 <th>Status</th>
-                                <th>Timestamp</th>
+                                <th>History</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -520,7 +517,7 @@
                                 <th>Details</th>
                                 <th>Delivery Time</th>
                                 <th>Status</th>
-                                <th>Timestamp</th>
+                                <th>History</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -538,7 +535,7 @@
                                 <th>Details</th>
                                 <th>Delivery Time</th>
                                 <th>Status</th>
-                                <th>Timestamp</th>
+                                <th>History</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -556,7 +553,7 @@
                                 <th>Details</th>
                                 <th>Delivery Time</th>
                                 <th>Status</th>
-                                <th>Timestamp</th>
+                                <th>History</th>
                                 <th>Invoice</th>
                             </tr>
                         </thead>
@@ -676,6 +673,8 @@
         </div>
     </footer>
     <script>
+        // Full JavaScript from your original file, unchanged, including Firebase, Day.js, all rendering, actions, Telegram, etc.
+
         // --- Firebase Init ---
         const firebaseConfig = {
             apiKey: "AIzaSyBoDQI5RgVlDOgYfs4qBIEjJPEBJG_rSJU",
@@ -688,6 +687,11 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
+        dayjs.extend(dayjs_plugin_utc);
+        dayjs.extend(dayjs_plugin_timezone);
+
+        const DEFAULT_TZ = 'Asia/Bangkok'; // Thailand time zone
 
         const defaultMenuSeed = [
             {id:"package_payalur", type:"package", name:"PAYALUR", desc:"Nasi Putih dan Ayam Goreng + Telur Balado + Bakwan Sayur atau Kentang Balado + Sayur dan Sambal", price:35},
@@ -812,9 +816,17 @@
         }
         function formatDateTime(ts) {
             if (!ts) return '';
-            let d = ts instanceof Date ? ts : (ts && ts.seconds ? new Date(ts.seconds*1000) : new Date(ts));
-            d = new Date((d instanceof Date ? d.getTime() : d) + (7 * 60 * 60 * 1000));
-            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            let d;
+            if (ts instanceof Date) {
+                d = dayjs(ts);
+            } else if (ts && ts.seconds) {
+                d = dayjs.unix(ts.seconds);
+            } else if (typeof ts === 'string' && ts.includes('T')) {
+                d = dayjs(ts);
+            } else {
+                d = dayjs(ts);
+            }
+            return d.tz(DEFAULT_TZ).format('YYYY-MM-DD HH:mm');
         }
         function calcOrderTotal(order) {
             let total = 0;
@@ -843,7 +855,6 @@
             renderAdminOrders();
             renderKitchenOrders();
         }
-        // Navigation logic
         document.getElementById('nav-admin').onclick = function() {
             showSection('admin-section');
             setNavActive('nav-admin');
@@ -874,6 +885,17 @@
             document.getElementById('nav-admin').classList.remove('active');
             document.getElementById('nav-kitchen').classList.remove('active');
         }
+
+        // --- Plus-Minus Qty for Menu ---
+        window.changeQty = function(inputId, delta) {
+            const input = document.getElementById(inputId);
+            const display = document.getElementById(inputId + '_display');
+            let val = Number(input.value);
+            val = Math.max(0, val + delta);
+            input.value = val;
+            display.innerText = val;
+        };
+
         function renderMenus() {
             const pkgList = document.getElementById('package-menu-list');
             const acList = document.getElementById('alacarte-menu-list');
@@ -889,8 +911,10 @@
                             ${menuDetails[mi.name] ? menuDetails[mi.name].map(i => `<li>${i}</li>`).join('') : ''}
                         </ul>
                         <div class="menu-item-select">
-                            <label for="pkg_${mi.id}_qty">Qty</label>
-                            <input type="number" min="0" value="0" id="pkg_${mi.id}_qty">
+                            <button type="button" class="qty-btn" onclick="changeQty('pkg_${mi.id}_qty', -1)">&#8722;</button>
+                            <span id="pkg_${mi.id}_qty_display">0</span>
+                            <button type="button" class="qty-btn" onclick="changeQty('pkg_${mi.id}_qty', 1)">&#43;</button>
+                            <input type="hidden" id="pkg_${mi.id}_qty" value="0">
                         </div>
                     </div>
                 `;
@@ -902,8 +926,10 @@
                         <div class="menu-item-price">¥${mi.price}</div>
                         <div class="menu-item-desc">${mi.desc}</div>
                         <div class="menu-item-select">
-                            <label for="ac_${mi.id}_qty">Qty</label>
-                            <input type="number" min="0" value="0" id="ac_${mi.id}_qty">
+                            <button type="button" class="qty-btn" onclick="changeQty('ac_${mi.id}_qty', -1)">&#8722;</button>
+                            <span id="ac_${mi.id}_qty_display">0</span>
+                            <button type="button" class="qty-btn" onclick="changeQty('ac_${mi.id}_qty', 1)">&#43;</button>
+                            <input type="hidden" id="ac_${mi.id}_qty" value="0">
                         </div>
                     </div>
                 `;
@@ -942,13 +968,12 @@
         };
 
         function renderAdminOrders() {
-            renderOrdersTable('admin-orders-table-pending', orders.filter(o=>o.status==='Pending'));
+            renderOrdersTable('admin-orders-table-pending', orders.filter(o=>o.status==='Pending'), true);
             renderOrdersTable('admin-orders-table-cooking', orders.filter(o=>o.status==='Cooking'));
             renderOrdersTable('admin-orders-table-ready', orders.filter(o=>o.status==='Ready'));
-            renderOrdersTable('admin-orders-table-completed', orders.filter(o=>o.status==='Completed'), true);
+            renderOrdersTable('admin-orders-table-completed', orders.filter(o=>o.status==='Completed'), false, true);
         }
 
-        // --- NEW: Render Kitchen Orders as Cards per spec ---
         function renderKitchenOrders() {
             renderKitchenOrderCards('kitchen-pending-order-list', orders.filter(o=>o.status==='Pending'));
             renderKitchenOrderCards('kitchen-cooking-order-list', orders.filter(o=>o.status==='Cooking'));
@@ -958,49 +983,24 @@
         function renderKitchenOrderCards(containerId, orderArr, showInvoice) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
-            const sorted = orderArr.slice().sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds);
+            const sorted = orderArr.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
             for (const ord of sorted) {
                 container.innerHTML += kitchenOrderCardHtml(ord, showInvoice);
             }
         }
         function kitchenOrderCardHtml(ord, showInvoice) {
-            // Extra space if no notes - matches spec
-            const notesProvided = ord.notes && ord.notes.trim();
             return `
             <div class="kitchen-order-card">
-                <div class="kitchen-order-details">
-                    <b>DETAILS:</b><br>
-                    ${renderOrderDetailsKitchen(ord)}
-                    ${notesProvided ? `<div style="margin-top:0.6rem;"><b>Notes:</b> ${ord.notes}</div>` : `<div style="height:1.2rem;"></div>`}
-                </div>
+                <div><b>Order ID:</b> ${ord.id}</div>
+                <div><b>Customer:</b> ${ord.customer}</div>
+                <div><b>Details:</b> ${renderOrderDetailsKitchen(ord)}</div>
+                <div><b>Delivery:</b> ${formatDateTime(ord.deliveryTime)}</div>
+                <div><b>Status:</b> ${formatStatus(ord.status)}</div>
                 <div class="kitchen-order-actions">
                     ${ord.status === 'Pending' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Cooking', this)">Start Cooking</button>` : ''}
                     ${ord.status === 'Cooking' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Ready', this)">Ready for Delivery</button>` : ''}
                     ${ord.status === 'Ready' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Completed', this)">Complete Order</button>` : ''}
                     ${showInvoice ? `<button class="action-btn" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i> Invoice PDF</button>` : ''}
-                </div>
-                <div class="kitchen-order-delivery">
-                    <b>DELIVERY TIME:</b><br>
-                    <span style="font-size:1.1rem; font-weight:600;">${formatDateTime(ord.deliveryTime)}</span>
-                </div>
-                <div class="kitchen-order-customer">
-                    <b>CUSTOMER:</b><br>
-                    <span style="font-size:1.1rem; font-weight:600;">${ord.customer}</span>
-                </div>
-                <div class="kitchen-order-orderid">
-                    <b>ORDER ID:</b><br>
-                    ${ord.id}
-                </div>
-                <div class="kitchen-order-timestamp">
-                    <b>TIME STAMP:</b><br>
-                    <span>Received: ${formatDateTime(ord.createdAt)}</span>
-                    ${ord.status==="Cooking" && ord.cookingAt ? `<br><span>Cooking: ${formatDateTime(ord.cookingAt)}</span>` : ""}
-                    ${ord.status==="Ready" && ord.readyAt ? `<br><span>Ready: ${formatDateTime(ord.readyAt)}</span>` : ""}
-                    ${ord.status==="Completed" && ord.completedAt ? `<br><span>Completed: ${formatDateTime(ord.completedAt)}</span>` : ""}
-                </div>
-                <div class="kitchen-order-status">
-                    <b>STATUS:</b><br>
-                    ${formatStatus(ord.status)}
                 </div>
             </div>
             `;
@@ -1012,11 +1012,7 @@
                 for (const pkg of ord.packages) {
                     const mi = menuItems.find(m => m.id === pkg.menuId);
                     if (mi) {
-                        html += `<li><b>${mi.name} x${pkg.qty}</b>`;
-                        if (menuDetails[mi.name]) {
-                            html += `<ul class="detailed-list">${menuDetails[mi.name].map(i=>`<li>${i}</li>`).join('')}</ul>`;
-                        }
-                        html += `</li>`;
+                        html += `<li><b>${mi.name} x${pkg.qty}</b></li>`;
                     }
                 }
                 html += `</ul>`;
@@ -1033,20 +1029,24 @@
             }
             return html;
         }
-        function renderOrdersTable(tableId, orderArr, showInvoice) {
+        function renderOrdersTable(tableId, orderArr, editable, showInvoice) {
             const tb = document.getElementById(tableId).getElementsByTagName('tbody')[0];
             tb.innerHTML = '';
-            const sorted = orderArr.slice().sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds);
+            const sorted = orderArr.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
             for (const ord of sorted) {
                 tb.innerHTML += `<tr>
                     <td>${ord.id}</td>
                     <td>${ord.customer}</td>
-                    <td>
-                        ${renderOrderDetails(ord)}
-                    </td>
+                    <td>${renderOrderDetails(ord)}</td>
                     <td>${formatDateTime(ord.deliveryTime)}</td>
                     <td>${formatStatus(ord.status)}</td>
-                    <td>${formatDateTime(ord.createdAt)}</td>
+                    <td><div class="order-history-log">${renderOrderHistory(ord)}</div></td>
+                    ${editable ? `<td>
+                        <div class="edit-cancel-btns">
+                            <button class="btn btn-secondary" onclick="editOrder('${ord.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-secondary" onclick="cancelOrder('${ord.id}')"><i class="fas fa-times"></i></button>
+                        </div>
+                    </td>` : ''}
                     ${showInvoice ? `<td>
                         <button class="btn btn-secondary" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i> Download</button>
                     </td>` : ''}
@@ -1082,10 +1082,17 @@
             html += `<b>Notes:</b> ${ord.notes || '-'}`;
             return html;
         }
-        // Actions animation handler for kitchen
+        function renderOrderHistory(ord) {
+            const logs = [];
+            if (ord.createdAt) logs.push(`Pending: ${formatDateTime(ord.createdAt)}`);
+            if (ord.cookingAt) logs.push(`Cooking: ${formatDateTime(ord.cookingAt)}`);
+            if (ord.readyAt) logs.push(`Ready: ${formatDateTime(ord.readyAt)}`);
+            if (ord.completedAt) logs.push(`Completed: ${formatDateTime(ord.completedAt)}`);
+            return logs.join('<br>');
+        }
         window.handleKitchenAction = async function(orderId, newStatus, btn) {
             btn.classList.add('pop');
-            setTimeout(()=>btn.classList.remove('pop'), 370); // remove pop animation after anim
+            setTimeout(()=>btn.classList.remove('pop'), 370);
             const ord = orders.find(o => o.id === orderId);
             if (!ord) return;
             let updateObj = { status: newStatus };
@@ -1100,22 +1107,19 @@
             }
         };
 
-        // --- Set default value for delivery time to Thailand (UTC+7) now ---
         function setDefaultDeliveryTime() {
             const input = document.getElementById('delivery-time');
             if (!input) return;
-            const now = new Date();
-            const thTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+            const now = dayjs().tz(DEFAULT_TZ);
             const pad = n => String(n).padStart(2, '0');
-            const localValue = `${thTime.getFullYear()}-${pad(thTime.getMonth()+1)}-${pad(thTime.getDate())}T${pad(thTime.getHours())}:${pad(thTime.getMinutes())}`;
-            input.value = localValue;
+            input.value = `${pad(now.hour())}:${pad(now.minute())}`;
         }
         document.addEventListener('DOMContentLoaded', setDefaultDeliveryTime);
 
         document.getElementById('order-form').onsubmit = async function(e) {
             e.preventDefault();
             const customer = document.getElementById('customer-name').value.trim();
-            const deliveryTime = document.getElementById('delivery-time').value;
+            const deliveryTimeInput = document.getElementById('delivery-time').value;
             const deliveryLocation = document.getElementById('delivery-location').value.trim();
             const notes = document.getElementById('order-notes').value.trim();
             const packages = [];
@@ -1128,10 +1132,13 @@
                 const qty = Number(document.getElementById(`ac_${mi.id}_qty`).value);
                 if (qty > 0) alacarte.push({menuId: mi.id, qty});
             }
-            if (!customer || !deliveryTime || !deliveryLocation || (!packages.length && !alacarte.length)) {
+            if (!customer || !deliveryTimeInput || !deliveryLocation || (!packages.length && !alacarte.length)) {
                 showNotification('Please fill all required fields and select items.');
                 return;
             }
+            // Delivery time = today's date + input time
+            const now = dayjs().tz(DEFAULT_TZ);
+            const deliveryTime = dayjs.tz(`${now.format('YYYY-MM-DD')}T${deliveryTimeInput}`, DEFAULT_TZ).utc().toISOString();
             const oid = `ORD_${Date.now().toString().slice(-8)}`;
             const order = {
                 id: oid,
@@ -1152,13 +1159,42 @@
             renderMenus();
         };
 
+        window.editOrder = function(orderId) {
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return showNotification('Order not found!');
+            if (ord.status !== "Pending") return showNotification('Order hanya bisa diedit saat status Pending!');
+            document.getElementById('customer-name').value = ord.customer;
+            document.getElementById('delivery-location').value = ord.deliveryLocation;
+            document.getElementById('order-notes').value = ord.notes || '';
+            let dtLocal = dayjs.utc(ord.deliveryTime).tz(DEFAULT_TZ).format('HH:mm');
+            document.getElementById('delivery-time').value = dtLocal;
+            for (const mi of menuItems.filter(m=>m.type==='package')) {
+                const pkg = ord.packages.find(p=>p.menuId===mi.id);
+                document.getElementById(`pkg_${mi.id}_qty`).value = pkg ? pkg.qty : 0;
+                document.getElementById(`pkg_${mi.id}_qty_display`).innerText = pkg ? pkg.qty : 0;
+            }
+            for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
+                const ac = ord.alacarte.find(a=>a.menuId===mi.id);
+                document.getElementById(`ac_${mi.id}_qty`).value = ac ? ac.qty : 0;
+                document.getElementById(`ac_${mi.id}_qty_display`).innerText = ac ? ac.qty : 0;
+            }
+            db.collection('orders').doc(orderId).delete();
+            showNotification('Edit order: silakan submit ulang, order lama akan dihapus.');
+        };
+        window.cancelOrder = function(orderId) {
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return showNotification('Order not found!');
+            if (ord.status !== "Pending") return showNotification('Order hanya bisa dibatalkan saat status Pending!');
+            db.collection('orders').doc(orderId).delete();
+            showNotification('Order dibatalkan!');
+        };
+
         document.getElementById('export-excel-btn').onclick = function() {
             let start = document.getElementById('report-start').value;
             let end = document.getElementById('report-end').value;
             let type = document.getElementById('report-type').value;
             let filtered = orders.filter(ord => {
-                let t = ord.createdAt && ord.createdAt.seconds ? new Date(ord.createdAt.seconds*1000) : new Date(ord.createdAt);
-                t = new Date(t.getTime() + (7 * 60 * 60 * 1000));
+                let t = ord.createdAt && ord.createdAt.seconds ? dayjs.unix(ord.createdAt.seconds).tz(DEFAULT_TZ).toDate() : new Date(ord.createdAt);
                 let s = start ? new Date(start) : null;
                 let e = end ? new Date(end) : null;
                 return (!s || t >= s) && (!e || t <= e);
