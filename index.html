@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cita Rasa Indo Catering Management App - Firebase + Telegram Sync</title>
+    <title>Cita Rasa Indo Catering - Auto Telegram & Responsive</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -27,16 +27,16 @@
             --font: 'Inter', sans-serif;
         }
         html, body {
-            height: 100%;
+            min-height: 100%;
             margin: 0;
             font-family: var(--font);
             background: var(--background);
             color: var(--text);
         }
         body {
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
         }
         header {
             background: var(--primary);
@@ -196,8 +196,8 @@
         }
         .notification {
             position: fixed;
-            right: 1.5rem;
-            top: 1.5rem;
+            right: 1.2rem;
+            top: 1.2rem;
             background: var(--primary);
             color: white;
             padding: 1rem 2rem;
@@ -288,17 +288,31 @@
             margin-bottom: 0.3rem;
             color: var(--primary);
         }
-        /* Responsive */
+        /* Responsive Styles */
         @media (max-width: 900px) {
             .container { padding: 1rem 0.5rem; }
             .card { padding: 1rem; }
+            nav { gap: 0.6rem; }
         }
         @media (max-width: 600px) {
             nav { flex-direction: column; gap: 0.4rem; }
             header { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
             .section-title { font-size: 1.05rem; }
+            .container { padding: 0.5rem 0.2rem; }
+            .card { padding: 0.5rem; }
+            .menu-list { grid-template-columns: 1fr; gap: 0.7rem; }
+            table { font-size: 0.92rem; }
+            th, td { padding: 0.5rem 0.3rem; }
+            .footer { padding: 1rem 0.5rem; font-size: 0.93rem; }
+            .notification { padding: 0.7rem 1rem; font-size: 0.97rem; }
         }
-        /* Hide sections by default */
+        @media (max-width: 430px) {
+            .section-title { font-size: 0.85rem; }
+            .container { padding: 0.1rem 0; }
+            .menu-item-title { font-size: 0.99rem; }
+            .footer { font-size: 0.85rem; padding: 0.7rem 0.2rem; }
+            th, td { font-size: 0.85rem; }
+        }
         .section { display: none; }
         .section.active { display: block; }
     </style>
@@ -499,7 +513,6 @@
                                 <th>Status</th>
                                 <th>Timestamp</th>
                                 <th>Invoice</th>
-                                <th>Kirim Telegram</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -605,7 +618,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- Menu Data ---
         const menuDetails = {
             'PAYALUR': [
                 'Nasi Putih',
@@ -679,8 +691,8 @@
         let menuItems = [];
         let orders = [];
         let invoices = [];
+        let telegramSentIds = new Set();
 
-        // --- Helper Functions ---
         function showNotification(msg, duration = 2500) {
             const notif = document.getElementById('notification');
             notif.innerText = msg;
@@ -718,7 +730,6 @@
             let e = end ? end.replaceAll('-', '_') : '';
             return `report_${type}_${s}_${e}.xlsx`;
         }
-        // --- Section Switching ---
         const sections = ['admin-section','kitchen-section','reports-section','menu-section'];
         function showSection(secId) {
             sections.forEach(id => {
@@ -734,7 +745,6 @@
         document.getElementById('nav-reports').onclick = () => showSection('reports-section');
         document.getElementById('nav-menu').onclick = () => showSection('menu-section');
 
-        // --- Menu Rendering ---
         function renderMenus() {
             const pkgList = document.getElementById('package-menu-list');
             const acList = document.getElementById('alacarte-menu-list');
@@ -802,7 +812,6 @@
             document.getElementById('menu-form').reset();
         };
 
-        // --- Orders ---
         function renderAdminOrders() {
             renderOrdersTable('admin-orders-table-pending', orders.filter(o=>o.status==='Pending'));
             renderOrdersTable('admin-orders-table-cooking', orders.filter(o=>o.status==='Cooking'));
@@ -835,7 +844,7 @@
                 </tr>`;
             }
         }
-        function renderOrdersTableKitchen(tableId, orderArr, showInvoice, showTelegram) {
+        function renderOrdersTableKitchen(tableId, orderArr, showInvoice) {
             const tb = document.getElementById(tableId).getElementsByTagName('tbody')[0];
             tb.innerHTML = '';
             const sorted = orderArr.slice().sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds);
@@ -854,7 +863,6 @@
                         ${ord.status === 'Cooking' ? `<button class="btn btn-secondary" onclick="updateOrderStatus('${ord.id}','Ready')">Ready</button>` : ''}
                         ${ord.status === 'Ready' ? `<button class="btn btn-secondary" onclick="updateOrderStatus('${ord.id}','Completed')">Complete</button>` : ''}
                         ${showInvoice ? `<button class="btn btn-secondary" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i></button>` : ''}
-                        ${showTelegram ? `<button class="btn btn-secondary" onclick="sendTelegram('${ord.id}')"><i class="fab fa-telegram"></i></button>` : ''}
                     </td>
                 </tr>`;
             }
@@ -898,9 +906,12 @@
             }
             await db.collection('orders').doc(orderId).update(updateObj);
             showNotification(`Order ${orderId} status updated to ${newStatus}`);
+            // Kirim Telegram otomatis ketika status berubah jadi Ready
+            if (newStatus === "Ready") {
+                sendTelegram(orderId);
+            }
         };
 
-        // --- Order Form ---
         document.getElementById('order-form').onsubmit = async function(e) {
             e.preventDefault();
             const customer = document.getElementById('customer-name').value.trim();
@@ -940,7 +951,6 @@
             renderMenus();
         };
 
-        // --- Excel Export ---
         document.getElementById('export-excel-btn').onclick = function() {
             let start = document.getElementById('report-start').value;
             let end = document.getElementById('report-end').value;
@@ -979,7 +989,6 @@
             showNotification('Excel report exported!');
         };
 
-        // --- Invoice Generation (PDF) ---
         function generateInvoice(orderId) {
             const ord = orders.find(o => o.id === orderId);
             if (!ord) return;
@@ -1058,12 +1067,12 @@
             showNotification('Invoice downloaded!');
         };
 
-        // --- Telegram Send ---
-        window.sendTelegram = function(orderId) {
+        function sendTelegram(orderId) {
+            if (telegramSentIds.has(orderId)) return;
             const ord = orders.find(o => o.id === orderId);
-            if (!ord) return showNotification('Order not found!');
+            if (!ord) return;
             let msg = '🕺🏻👋🏻 GROUP ORDER INTERNAL 🕺🏻👋🏻\n\n';
-            msg += `Pesanan Selesai #${ord.id}\n`;
+            msg += `Pesanan Siap Diantar #${ord.id}\n`;
             msg += `Customer: ${ord.customer}\nDelivery Location: ${ord.deliveryLocation}\nDelivery Time: ${formatDateTime(ord.deliveryTime)}\n\n`;
             msg += `Order:\n`;
             for (const pkg of ord.packages) {
@@ -1085,16 +1094,15 @@
             }
             msg += `Notes: ${ord.notes || '-'}\n`;
             msg += `Total: ¥${calcOrderTotal(ord)}\n`;
-
             const botToken = "7977280306:AAFG8qAVnSD81p73iFP3wRceOP-605auqQ0";
-            const chatId = "-1002880911209"; // Group ID for GROUP ORDER INTERNAL
-
+            const chatId = "-1002880911209";
             fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: `chat_id=${encodeURIComponent(chatId)}&text=${encodeURIComponent(msg)}`
             }).then(r=>r.json()).then(data=>{
                 if (data.ok) {
+                    telegramSentIds.add(orderId);
                     showNotification('Pesan Telegram sukses!');
                 } else {
                     showNotification('Gagal kirim Telegram: ' + JSON.stringify(data));
@@ -1102,9 +1110,8 @@
             }).catch(e=>{
                 showNotification('Gagal kirim Telegram: ' + e.message);
             });
-        };
+        }
 
-        // --- Real-time Sync Firestore ---
         db.collection('menu').onSnapshot(snap => {
             menuItems = snap.docs.map(doc => doc.data());
             renderMenus();
@@ -1120,7 +1127,6 @@
             renderInvoicesTable();
         });
 
-        // --- Initial Load ---
         function initialLoad() {
             renderMenus();
             renderMenuTable();
