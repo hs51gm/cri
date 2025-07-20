@@ -30,8 +30,11 @@
             --warning-pending: #ffe1c2;
             --warning-cooking: #ffe7b3;
             --warning-ready: #b3ffe3;
-            --warning-completed: #e3d2ff;
             --nav-active: #fff5df;
+
+            --action-highlight: #ff6d1a;
+            --action-highlight-dark: #e34c00;
+            --action-highlight-light: #ffb97a;
         }
         html, body {
             min-height: 100%;
@@ -164,7 +167,8 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.14s;
+            will-change: transform;
         }
         .btn:disabled {
             background: #ffb97a;
@@ -172,6 +176,27 @@
         }
         .btn-secondary {
             background: var(--secondary);
+            color: var(--primary-dark);
+        }
+        .btn-action {
+            background: var(--action-highlight);
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 10px rgba(255,109,26,0.12);
+            transition: background 0.18s, transform 0.16s;
+            cursor: pointer;
+            padding: 0.6rem 1.3rem;
+            font-size: 1rem;
+            outline: none;
+        }
+        .btn-action:active, .btn-action.pop-motion {
+            background: var(--action-highlight-dark);
+            transform: scale(0.97);
+        }
+        .btn-action:hover {
+            background: var(--action-highlight-light);
             color: var(--primary-dark);
         }
         .table-responsive {
@@ -210,12 +235,9 @@
         .status-pending { background: var(--warning-pending); color: #e65100; border: 2px solid #ffd54f;}
         .status-cooking { background: var(--warning-cooking); color: #1b5e20; border: 2px solid #388e3c;}
         .status-ready { background: var(--warning-ready); color: #01579b; border: 2px solid #1976d2;}
-        .status-completed { background: var(--warning-completed); color: #4527a0; border: 2px solid #7e57c2;}
-        /* Order Group Titles */
         .order-group-title.pending {background: var(--warning-pending); color: #e65100; padding: 0.4rem 1rem; border-radius: var(--radius);}
         .order-group-title.cooking {background: var(--warning-cooking); color: #1b5e20; padding: 0.4rem 1rem; border-radius: var(--radius);}
         .order-group-title.ready {background: var(--warning-ready); color: #01579b; padding: 0.4rem 1rem; border-radius: var(--radius);}
-        .order-group-title.completed {background: var(--warning-completed); color: #4527a0; padding: 0.4rem 1rem; border-radius: var(--radius);}
         .actions {
             display: flex;
             gap: 0.6rem;
@@ -369,6 +391,30 @@
         }
         .section { display: none; }
         .section.active { display: block; }
+        /* Kitchen Table Custom */
+        .kitchen-table th, .kitchen-table td {
+            vertical-align: top;
+        }
+        .kitchen-details {
+            min-width: 220px;
+        }
+        .kitchen-actions {
+            min-width: 120px;
+            text-align: center;
+        }
+        .kitchen-actions .btn-action {
+            min-width: 90px;
+            margin: 4px 0;
+        }
+        .pop-motion {
+            animation: popInOut 0.38s cubic-bezier(.18,.89,.32,1.28);
+        }
+        @keyframes popInOut {
+            0% { transform: scale(1);}
+            40% { transform: scale(1.08);}
+            70% { transform: scale(0.94);}
+            100% { transform: scale(1);}
+        }
     </style>
 </head>
 <body>
@@ -495,38 +541,19 @@
         <!-- Kitchen Dashboard Section -->
         <section id="kitchen-section" class="section card">
             <div class="section-title"><i class="fas fa-utensils"></i> Kitchen Dashboard - Orders</div>
-            <div class="order-group" id="kitchen-orders-pending">
-                <div class="order-group-title pending">Belum Dimasak</div>
-                <div class="table-responsive">
-                    <table id="kitchen-orders-table-pending">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Details</th>
-                                <th>Delivery Time</th>
-                                <th>Status</th>
-                                <th>Timestamp</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
             <div class="order-group" id="kitchen-orders-cooking">
                 <div class="order-group-title cooking">Sedang Dimasak</div>
                 <div class="table-responsive">
-                    <table id="kitchen-orders-table-cooking">
+                    <table id="kitchen-orders-table-cooking" class="kitchen-table">
                         <thead>
                             <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
                                 <th>Details</th>
                                 <th>Delivery Time</th>
-                                <th>Status</th>
-                                <th>Timestamp</th>
+                                <th>Customer</th>
                                 <th>Actions</th>
+                                <th>Order ID</th>
+                                <th>Timestamp</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -536,35 +563,16 @@
             <div class="order-group" id="kitchen-orders-ready">
                 <div class="order-group-title ready">Siap Diantar</div>
                 <div class="table-responsive">
-                    <table id="kitchen-orders-table-ready">
+                    <table id="kitchen-orders-table-ready" class="kitchen-table">
                         <thead>
                             <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
                                 <th>Details</th>
                                 <th>Delivery Time</th>
-                                <th>Status</th>
-                                <th>Timestamp</th>
+                                <th>Customer</th>
                                 <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="order-group" id="kitchen-orders-completed">
-                <div class="order-group-title completed">Selesai</div>
-                <div class="table-responsive">
-                    <table id="kitchen-orders-table-completed">
-                        <thead>
-                            <tr>
                                 <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Details</th>
-                                <th>Delivery Time</th>
-                                <th>Status</th>
                                 <th>Timestamp</th>
-                                <th>Invoice</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -678,21 +686,22 @@
 
         // --- MENU DATA ---
         const defaultMenuSeed = [
-            {id:"package_payalur",type:"package",name:"PAYALUR",desc:"Nasi, Ayam Goreng, Telur Balado, Bakwan/Kentang, Sayur, Sambal",price:75},
-            {id:"package_payalit",type:"package",name:"PAYALIT",desc:"Nasi, Ayam Goreng, Telur/Bakwan, Sayur, Sambal",price:70},
-            {id:"package_payamat",type:"package",name:"PAYAMAT",desc:"Nasi, Ayam Goreng, Sayur, Sambal",price:65},
-            {id:"package_palutang",type:"package",name:"PALUTANG",desc:"Nasi, Telur Balado, Kentang Balado, Bakwan Sayur, Sayur",price:60},
-            {id:"package_palur",type:"package",name:"PALUR",desc:"Nasi, Telur Balado, Bakwan Sayur, Sayur",price:55},
-            {id:"package_prames_a",type:"package",name:"PRAMES A",desc:"Nasi, Ayam Goreng, Tahu, Timun, Sambal, Kremesan",price:80},
-            {id:"package_prames_b",type:"package",name:"PRAMES B",desc:"Nasi, Ayam Goreng, Telur Balado, Tahu, Timun, Sambal, Kremesan",price:85},
-            {id:"package_prames_c",type:"package",name:"PRAMES C",desc:"Nasi, Ayam Goreng, Kentang Balado, Tahu, Timun, Sambal, Kremesan",price:90},
-            {id:"package_prames_veggie",type:"package",name:"PRAMES VEGGIE",desc:"Nasi, Tahu, Timun, Sambal, Kremesan",price:60},
-            {id:"alacarte_ayam_goreng",type:"alacarte",name:"Ayam Goreng",desc:"Ala Carte",price:25},
-            {id:"alacarte_telur_balado",type:"alacarte",name:"Telur Balado",desc:"Ala Carte",price:15},
-            {id:"alacarte_bakwan_sayur",type:"alacarte",name:"Bakwan Sayur",desc:"Ala Carte",price:15},
-            {id:"alacarte_kentang_balado",type:"alacarte",name:"Kentang Balado",desc:"Ala Carte",price:20},
-            {id:"alacarte_tahu",type:"alacarte",name:"Tahu",desc:"Ala Carte",price:10}
+            {id:"package_payalur", type:"package", name:"PAYALUR", desc:"Nasi Putih dan Ayam Goreng + Telur Balado + Bakwan Sayur atau Kentang Balado + Sayur dan Sambal", price:35},
+            {id:"package_payalit", type:"package", name:"PAYALIT", desc:"Nasi Putih dan Ayam Goreng + Telur atau Bakwan Sayur + Sayur dan Sambal", price:30},
+            {id:"package_payamat", type:"package", name:"PAYAMAT", desc:"Nasi Putih dan Ayam Goreng + Sayur dan Sambal", price:25},
+            {id:"package_palutang", type:"package", name:"PALUTANG", desc:"Nasi Putih dan Telur Balado + Kentang Balado + Bakwan Sayur + Sayur", price:25},
+            {id:"package_palur", type:"package", name:"PALUR", desc:"Nasi Putih dan Telur Balado + Bakwan Sayur + Sayur", price:20},
+            {id:"package_prames_a", type:"package", name:"PRAMES A", desc:"Nasi Putih + Ayam Goreng + Tahu + Timun + Sambal + Kremesan", price:25},
+            {id:"package_prames_b", type:"package", name:"PRAMES B", desc:"Nasi Putih + Ayam Goreng + Telur Balado + Tahu + Timun + Sambal + Kremesan", price:33},
+            {id:"package_prames_c", type:"package", name:"PRAMES C", desc:"Nasi Putih + Ayam Goreng + Kentang Balado + Tahu + Timun + Sambal + Kremesan", price:30},
+            {id:"package_prames_veggie", type:"package", name:"PRAMES VEGGIE", desc:"Nasi Putih + Tahu + Timun + Sambal + Kremesan", price:15},
+            {id:"alacarte_ayam_goreng", type:"alacarte", name:"Ayam Goreng", desc:"Ala Carte", price:15},
+            {id:"alacarte_telur_balado", type:"alacarte", name:"Telur Balado", desc:"Ala Carte", price:10},
+            {id:"alacarte_bakwan_sayur", type:"alacarte", name:"Bakwan Sayur", desc:"Ala Carte", price:5},
+            {id:"alacarte_kentang_balado", type:"alacarte", name:"Kentang Balado", desc:"Ala Carte", price:10},
+            {id:"alacarte_tahu", type:"alacarte", name:"Tahu", desc:"Ala Carte", price:5},
         ];
+
         const menuDetails = {
             'PAYALUR': [
                 'Nasi Putih',
@@ -936,56 +945,39 @@
             renderOrdersTable('admin-orders-table-ready', orders.filter(o=>o.status==='Ready'));
             renderOrdersTable('admin-orders-table-completed', orders.filter(o=>o.status==='Completed'), true);
         }
+
+        // KITCHEN TABLE: only Cooking and Ready
         function renderKitchenOrders() {
-            renderOrdersTableKitchen('kitchen-orders-table-pending', orders.filter(o=>o.status==='Pending'));
-            renderOrdersTableKitchen('kitchen-orders-table-cooking', orders.filter(o=>o.status==='Cooking'));
-            renderOrdersTableKitchen('kitchen-orders-table-ready', orders.filter(o=>o.status==='Ready'));
-            renderOrdersTableKitchen('kitchen-orders-table-completed', orders.filter(o=>o.status==='Completed'), true);
+            renderKitchenTable('kitchen-orders-table-cooking', orders.filter(o=>o.status==='Cooking'));
+            renderKitchenTable('kitchen-orders-table-ready', orders.filter(o=>o.status==='Ready'));
         }
-        function renderOrdersTable(tableId, orderArr, showInvoice) {
+        function renderKitchenTable(tableId, orderArr) {
             const tb = document.getElementById(tableId).getElementsByTagName('tbody')[0];
             tb.innerHTML = '';
             const sorted = orderArr.slice().sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds);
             for (const ord of sorted) {
+                const details = kitchenOrderDetails(ord);
+                const deliveryTime = formatDateTime(ord.deliveryTime);
+                const customer = ord.customer;
+                const orderId = ord.id;
+                const timestamp = formatDateTime(ord.createdAt);
+                const status = formatStatus(ord.status);
                 tb.innerHTML += `<tr>
-                    <td>${ord.id}</td>
-                    <td>${ord.customer}</td>
-                    <td>
-                        ${renderOrderDetails(ord)}
+                    <td class="kitchen-details">${details}</td>
+                    <td>${deliveryTime}</td>
+                    <td>${customer}</td>
+                    <td class="kitchen-actions">
+                        ${ord.status === 'Cooking' ? `<button class="btn-action" onclick="popAction(this);updateOrderStatus('${ord.id}','Ready')">Ready</button>` : ''}
+                        ${ord.status === 'Ready' ? `<button class="btn-action" onclick="popAction(this);updateOrderStatus('${ord.id}','Completed')">Complete</button>` : ''}
                     </td>
-                    <td>${formatDateTime(ord.deliveryTime)}</td>
-                    <td>${formatStatus(ord.status)}</td>
-                    <td>${formatDateTime(ord.createdAt)}</td>
-                    ${showInvoice ? `<td>
-                        <button class="btn btn-secondary" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i> Download</button>
-                    </td>` : ''}
+                    <td>${orderId}</td>
+                    <td>${timestamp}</td>
+                    <td>${status}</td>
                 </tr>`;
             }
         }
-        function renderOrdersTableKitchen(tableId, orderArr, showInvoice) {
-            const tb = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-            tb.innerHTML = '';
-            const sorted = orderArr.slice().sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds);
-            for (const ord of sorted) {
-                tb.innerHTML += `<tr>
-                    <td>${ord.id}</td>
-                    <td>${ord.customer}</td>
-                    <td>
-                        ${renderOrderDetails(ord)}
-                    </td>
-                    <td>${formatDateTime(ord.deliveryTime)}</td>
-                    <td>${formatStatus(ord.status)}</td>
-                    <td>${formatDateTime(ord.createdAt)}</td>
-                    <td class="actions">
-                        ${ord.status === 'Pending' ? `<button class="btn btn-secondary" onclick="updateOrderStatus('${ord.id}','Cooking')">Start Cooking</button>` : ''}
-                        ${ord.status === 'Cooking' ? `<button class="btn btn-secondary" onclick="updateOrderStatus('${ord.id}','Ready')">Ready</button>` : ''}
-                        ${ord.status === 'Ready' ? `<button class="btn btn-secondary" onclick="updateOrderStatus('${ord.id}','Completed')">Complete</button>` : ''}
-                        ${showInvoice ? `<button class="btn btn-secondary" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i></button>` : ''}
-                    </td>
-                </tr>`;
-            }
-        }
-        function renderOrderDetails(ord) {
+        // Kitchen details: if notes empty, add blank space for visual separation
+        function kitchenOrderDetails(ord) {
             let html = '';
             if (ord.packages.length) {
                 html += `<b>Package:</b> <ul class="detailed-list">`;
@@ -1011,9 +1003,20 @@
                 }
                 html += `</ul>`;
             }
-            html += `<b>Notes:</b> ${ord.notes || '-'}`;
+            if (ord.notes && ord.notes.trim() !== '') {
+                html += `<div style="margin-top:7px"><b>Notes:</b> ${ord.notes}</div>`;
+            } else {
+                // Add space for empty notes
+                html += `<div style="height:18px"></div>`;
+            }
             return html;
         }
+        window.popAction = function(btn) {
+            btn.classList.remove('pop-motion');
+            void btn.offsetWidth; // force reflow
+            btn.classList.add('pop-motion');
+        };
+
         window.updateOrderStatus = async function(orderId, newStatus) {
             const ord = orders.find(o => o.id === orderId);
             if (!ord) return;
