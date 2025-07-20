@@ -25,6 +25,10 @@
             --radius: 10px;
             --shadow: 0 2px 8px rgba(0,0,0,0.07);
             --font: 'Inter', sans-serif;
+            --warning-pending: #ffecb3;
+            --warning-cooking: #c8e6c9;
+            --warning-ready: #bbdefb;
+            --warning-completed: #d1c4e9;
         }
         html, body {
             min-height: 100%;
@@ -179,6 +183,8 @@
         tr:last-child td {
             border-bottom: none;
         }
+
+        /* Status Badges */
         .status-badge {
             padding: 0.3rem 0.8rem;
             border-radius: var(--radius);
@@ -186,10 +192,17 @@
             font-weight: 600;
             display: inline-block;
         }
-        .status-pending { background: #ffe0b2; color: #e65100; }
-        .status-cooking { background: #c8e6c9; color: #1b5e20; }
-        .status-ready { background: #bbdefb; color: #01579b; }
-        .status-completed { background: #d1c4e9; color: #4527a0; }
+        .status-pending { background: var(--warning-pending); color: #e65100; border: 2px solid #ffd54f;}
+        .status-cooking { background: var(--warning-cooking); color: #1b5e20; border: 2px solid #388e3c;}
+        .status-ready { background: var(--warning-ready); color: #01579b; border: 2px solid #1976d2;}
+        .status-completed { background: var(--warning-completed); color: #4527a0; border: 2px solid #7e57c2;}
+
+        /* Order Group Titles */
+        .order-group-title.pending {background: var(--warning-pending); color: #e65100; padding: 0.4rem 1rem; border-radius: var(--radius);}
+        .order-group-title.cooking {background: var(--warning-cooking); color: #1b5e20; padding: 0.4rem 1rem; border-radius: var(--radius);}
+        .order-group-title.ready {background: var(--warning-ready); color: #01579b; padding: 0.4rem 1rem; border-radius: var(--radius);}
+        .order-group-title.completed {background: var(--warning-completed); color: #4527a0; padding: 0.4rem 1rem; border-radius: var(--radius);}
+
         .actions {
             display: flex;
             gap: 0.6rem;
@@ -282,12 +295,6 @@
         .order-group {
             margin-bottom: 3rem;
         }
-        .order-group-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-            color: var(--primary);
-        }
         @media (max-width: 900px) {
             .container { padding: 1rem 0.5rem; }
             .card { padding: 1rem; }
@@ -366,7 +373,7 @@
             <div class="divider"></div>
             <div class="section-title"><i class="fas fa-list"></i> Orders to Kitchen</div>
             <div class="order-group" id="admin-orders-pending">
-                <div class="order-group-title">Belum Dimasak</div>
+                <div class="order-group-title pending">Belum Dimasak</div>
                 <div class="table-responsive">
                     <table id="admin-orders-table-pending">
                         <thead>
@@ -384,7 +391,7 @@
                 </div>
             </div>
             <div class="order-group" id="admin-orders-cooking">
-                <div class="order-group-title">Sedang Dimasak</div>
+                <div class="order-group-title cooking">Sedang Dimasak</div>
                 <div class="table-responsive">
                     <table id="admin-orders-table-cooking">
                         <thead>
@@ -402,7 +409,7 @@
                 </div>
             </div>
             <div class="order-group" id="admin-orders-ready">
-                <div class="order-group-title">Siap Diantar</div>
+                <div class="order-group-title ready">Siap Diantar</div>
                 <div class="table-responsive">
                     <table id="admin-orders-table-ready">
                         <thead>
@@ -420,7 +427,7 @@
                 </div>
             </div>
             <div class="order-group" id="admin-orders-completed">
-                <div class="order-group-title">Selesai</div>
+                <div class="order-group-title completed">Selesai</div>
                 <div class="table-responsive">
                     <table id="admin-orders-table-completed">
                         <thead>
@@ -443,7 +450,7 @@
         <section id="kitchen-section" class="section card">
             <div class="section-title"><i class="fas fa-utensils"></i> Kitchen Dashboard - Orders</div>
             <div class="order-group" id="kitchen-orders-pending">
-                <div class="order-group-title">Belum Dimasak</div>
+                <div class="order-group-title pending">Belum Dimasak</div>
                 <div class="table-responsive">
                     <table id="kitchen-orders-table-pending">
                         <thead>
@@ -462,7 +469,7 @@
                 </div>
             </div>
             <div class="order-group" id="kitchen-orders-cooking">
-                <div class="order-group-title">Sedang Dimasak</div>
+                <div class="order-group-title cooking">Sedang Dimasak</div>
                 <div class="table-responsive">
                     <table id="kitchen-orders-table-cooking">
                         <thead>
@@ -481,7 +488,7 @@
                 </div>
             </div>
             <div class="order-group" id="kitchen-orders-ready">
-                <div class="order-group-title">Siap Diantar</div>
+                <div class="order-group-title ready">Siap Diantar</div>
                 <div class="table-responsive">
                     <table id="kitchen-orders-table-ready">
                         <thead>
@@ -500,7 +507,7 @@
                 </div>
             </div>
             <div class="order-group" id="kitchen-orders-completed">
-                <div class="order-group-title">Selesai</div>
+                <div class="order-group-title completed">Selesai</div>
                 <div class="table-responsive">
                     <table id="kitchen-orders-table-completed">
                         <thead>
@@ -1101,9 +1108,9 @@
             if (telegramSentIds.has(orderId)) return;
             const ord = orders.find(o => o.id === orderId);
             if (!ord) return;
-            let msg = '🕺🏻👋🏻 GROUP ORDER INTERNAL 🕺🏻👋🏻\n\n';
-            msg += `Pesanan Siap Diantar #${ord.id}\n`;
-            msg += `Customer: ${ord.customer}\nDelivery Location: ${ord.deliveryLocation}\nDelivery Time: ${formatDateTime(ord.deliveryTime)}\n\n`;
+            let msg = '👋🏻 Siap Diantar 👋🏻\n\n';
+            msg += `Orderan #${ord.id}\n\n`;
+            msg += `Nama Customer: ${ord.customer}\nLocation: ${ord.deliveryLocation}\nDelivery Time: ${formatDateTime(ord.deliveryTime)}\n\n`;
             msg += `Order:\n`;
             for (const pkg of ord.packages) {
                 const mi = menuItems.find(m => m.id === pkg.menuId);
@@ -1122,7 +1129,7 @@
                     msg += `- ${mi.name} x${ac.qty}\n`;
                 }
             }
-            msg += `Notes: ${ord.notes || '-'}\n`;
+            msg += `Notes: ${ord.notes || '-'}\n\n`;
             msg += `Total: ¥${calcOrderTotal(ord)}\n`;
             const botToken = "7977280306:AAFG8qAVnSD81p73iFP3wRceOP-605auqQ0";
             const chatId = "-1002880911209";
