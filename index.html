@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cita Rasa Indo Catering Management App - Firebase + Telegram Sync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF for PDF Invoice -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --primary: #ff5722;
+            --secondary: #fff3e0;
+            --background: #f6f8fa;
+            --text: #222;
+            --border: #eee;
+            --radius: 10px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.07);
+            --font: 'Inter', sans-serif;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: var(--font);
+            background: var(--background);
+            color: var(--text);
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 1.2rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+        }
+        header h1 {
+            font-size: 1.6rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        header img {
+            width: 40px;
+            height: 40px;
+            margin-right: 1rem;
+            border-radius: 50%;
+        }
+        nav {
+            display: flex;
+            gap: 1.2rem;
+        }
+        nav button {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            padding: 0.4rem 1rem;
+            border-radius: var(--radius);
+        }
+        nav button.active, nav button:hover {
+            background: rgba(255,255,255,0.2);
+            opacity: 1;
+        }
+        .container {
+            flex: 1;
+            padding: 2rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border: 1px solid var(--border);
+        }
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 2rem 0;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.7rem;
+            font-size: 1rem;
+            background: #fafbfc;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border: 1.5px solid var(--primary);
+        }
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .form-row > .form-group {
+            flex: 1;
+            min-width: 220px;
+        }
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:disabled {
+            background: #ffab91;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--primary);
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 1rem;
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        th, td {
+            padding: 0.9rem 0.6rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--secondary);
+            font-weight: 600;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-pending { background: #ffe0b2; color: #e65100; }
+        .status-cooking { background: #c8e6c9; color: #1b5e20; }
+        .status-ready { background: #bbdefb; color: #01579b; }
+        .status-completed { background: #d1c4e9; color: #4527a0; }
+        .actions {
+            display: flex;
+            gap: 0.6rem;
+        }
+        .notification {
+            position: fixed;
+            right: 1.5rem;
+            top: 1.5rem;
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            z-index: 9999;
+            font-weight: 600;
+            display: none;
+        }
+        .menu-section {
+            margin-bottom: 2rem;
+        }
+        .menu-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 1.2rem;
+        }
+        .menu-item {
+            background: #fff8f4;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        .menu-item-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .menu-item-price {
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 0.6rem;
+        }
+        .menu-item-desc {
+            font-size: 0.97rem;
+            color: #444;
+            margin-bottom: 0.4rem;
+        }
+        .menu-item-select {
+            margin-top: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .menu-item-select input {
+            width: 50px;
+            text-align: center;
+        }
+        .search-filter-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+        }
+        .search-filter-row input, .search-filter-row select {
+            font-size: 1rem;
+            padding: 0.6rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: #fafbfc;
+        }
+        .footer {
+            background: var(--primary);
+            color: white;
+            padding: 1.3rem 2rem;
+            text-align: center;
+            font-size: 1rem;
+            margin-top: auto;
+        }
+        .detailed-list {
+            font-size: 0.98rem;
+            margin-top: 0.2rem;
+            margin-bottom: 0.4rem;
+            padding-left: 15px;
+        }
+        .detailed-list li {
+            margin-bottom: 2px;
+        }
+        .order-group {
+            margin-bottom: 3rem;
+        }
+        .order-group-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: var(--primary);
+        }
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container { padding: 1rem 0.5rem; }
+            .card { padding: 1rem; }
+        }
+        @media (max-width: 600px) {
+            nav { flex-direction: column; gap: 0.4rem; }
+            header { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
+            .section-title { font-size: 1.05rem; }
+        }
+        /* Hide sections by default */
+        .section { display: none; }
+        .section.active { display: block; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-title">
+            <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" alt="Cita Rasa Indo Logo">
+            <h1>Cita Rasa Indo Catering Admin</h1>
+        </div>
+        <nav>
+            <button id="nav-admin" class="active"><i class="fas fa-user-cog"></i> Admin Dashboard</button>
+            <button id="nav-kitchen"><i class="fas fa-utensils"></i> Kitchen Dashboard</button>
+            <button id="nav-reports"><i class="fas fa-file-excel"></i> Reports & Export</button>
+            <button id="nav-menu"><i class="fas fa-book"></i> Menu Management</button>
+        </nav>
+    </header>
+    <div class="notification" id="notification"></div>
+    <main class="container">
+        <!-- Admin Dashboard Section -->
+        <section id="admin-section" class="section card active">
+            <div class="section-title"><i class="fas fa-user-cog"></i> Admin Dashboard - Input Order</div>
+            <form id="order-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customer-name">Customer Name</label>
+                        <input type="text" id="customer-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="delivery-time">Delivery Time</label>
+                        <input type="datetime-local" id="delivery-time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="delivery-location">Delivery Location</label>
+                        <input type="text" id="delivery-location" required>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <div class="section-title"><i class="fas fa-list"></i> Packages</div>
+                    <div class="menu-list" id="package-menu-list"></div>
+                </div>
+                <div class="menu-section">
+                    <div class="section-title"><i class="fas fa-list"></i> Ala Carte</div>
+                    <div class="menu-list" id="alacarte-menu-list"></div>
+                </div>
+                <div class="form-group">
+                    <label for="order-notes">Additional Notes / Instructions (optional)</label>
+                    <textarea id="order-notes" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn" id="send-to-kitchen-btn">Send to Kitchen</button>
+            </form>
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-list"></i> Orders to Kitchen</div>
+            <div class="order-group" id="admin-orders-pending">
+                <div class="order-group-title">Belum Dimasak</div>
+                <div class="table-responsive">
+                    <table id="admin-orders-table-pending">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="order-group" id="admin-orders-cooking">
+                <div class="order-group-title">Sedang Dimasak</div>
+                <div class="table-responsive">
+                    <table id="admin-orders-table-cooking">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="order-group" id="admin-orders-ready">
+                <div class="order-group-title">Siap Diantar</div>
+                <div class="table-responsive">
+                    <table id="admin-orders-table-ready">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="order-group" id="admin-orders-completed">
+                <div class="order-group-title">Selesai</div>
+                <div class="table-responsive">
+                    <table id="admin-orders-table-completed">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                                <th>Invoice</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <!-- Kitchen Dashboard Section -->
+        <section id="kitchen-section" class="section card">
+            <div class="section-title"><i class="fas fa-utensils"></i> Kitchen Dashboard - Orders</div>
+            <div class="order-group" id="kitchen-orders-pending">
+                <div class="order-group-title">Belum Dimasak</div>
+                <div class="table-responsive">
+                    <table id="kitchen-orders-table-pending">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="order-group" id="kitchen-orders-cooking">
+                <div class="order-group-title">Sedang Dimasak</div>
+                <div class="table-responsive">
+                    <table id="kitchen-orders-table-cooking">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="order-group" id="kitchen-orders-ready">
+                <div class="order-group-title">Siap Diantar</div>
+                <div class="table-responsive">
+                    <table id="kitchen-orders-table-ready">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="order-group" id="kitchen-orders-completed">
+                <div class="order-group-title">Selesai</div>
+                <div class="table-responsive">
+                    <table id="kitchen-orders-table-completed">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                                <th>Invoice</th>
+                                <th>Kirim Telegram</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <!-- Reports & Export Section -->
+        <section id="reports-section" class="section card">
+            <div class="section-title"><i class="fas fa-file-excel"></i> Reports & Excel Export</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="report-range">Report Date Range</label>
+                    <input type="date" id="report-start"> to
+                    <input type="date" id="report-end">
+                </div>
+                <div class="form-group">
+                    <label for="report-type">Report Type</label>
+                    <select id="report-type">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" id="export-excel-btn"><i class="fas fa-file-export"></i> Export to Excel</button>
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-file-invoice"></i> Generated Invoices</div>
+            <div class="table-responsive">
+                <table id="invoices-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice ID</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total Price</th>
+                            <th>Completed Time</th>
+                            <th>Download</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+        <!-- Menu Management Section -->
+        <section id="menu-section" class="section card">
+            <div class="section-title"><i class="fas fa-book"></i> Menu Management</div>
+            <form id="menu-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="menu-type">Type</label>
+                        <select id="menu-type">
+                            <option value="package">Package</option>
+                            <option value="alacarte">Ala Carte</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu-name">Menu Name</label>
+                        <input type="text" id="menu-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu-desc">Description</label>
+                        <input type="text" id="menu-desc">
+                    </div>
+                    <div class="form-group">
+                        <label for="menu-price">Price (¥)</label>
+                        <input type="number" min="0" id="menu-price" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn"><i class="fas fa-plus"></i> Add Menu Item</button>
+            </form>
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-list"></i> Current Menu Items</div>
+            <div class="table-responsive">
+                <table id="menu-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    <footer class="footer">
+        &copy; 2025 Cita Rasa Indo | <a href="https://t.me/CriFood" target="_blank" style="color: #ffe0b2;">Telegram Channel</a>
+    </footer>
+    <script>
+        // --- Firebase Init ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBoDQI5RgVlDOgYfs4qBIEjJPEBJG_rSJU",
+            authDomain: "cita-rasa-indo.firebaseapp.com",
+            projectId: "cita-rasa-indo",
+            storageBucket: "cita-rasa-indo.firebasestorage.app",
+            messagingSenderId: "34181971563",
+            appId: "1:34181971563:web:eb1f554ba6bbcc9c797b2e",
+            measurementId: "G-N82XGK7SZY"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // --- Menu Data ---
+        const menuDetails = {
+            'PAYALUR': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Telur Balado',
+                'Bakwan Sayur atau Kentang Balado',
+                'Sayur',
+                'Sambal'
+            ],
+            'PAYALIT': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Telur atau Bakwan Sayur',
+                'Sayur',
+                'Sambal'
+            ],
+            'PAYAMAT': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Sayur',
+                'Sambal'
+            ],
+            'PALUTANG': [
+                'Nasi Putih',
+                'Telur Balado',
+                'Kentang Balado',
+                'Bakwan Sayur',
+                'Sayur'
+            ],
+            'PALUR': [
+                'Nasi Putih',
+                'Telur Balado',
+                'Bakwan Sayur',
+                'Sayur'
+            ],
+            'PRAMES A': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Tahu',
+                'Timun',
+                'Sambal',
+                'Kremesan'
+            ],
+            'PRAMES B': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Telur Balado',
+                'Tahu',
+                'Timun',
+                'Sambal',
+                'Kremesan'
+            ],
+            'PRAMES C': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Kentang Balado',
+                'Tahu',
+                'Timun',
+                'Sambal',
+                'Kremesan'
+            ],
+            'PRAMES VEGGIE': [
+                'Nasi Putih',
+                'Tahu',
+                'Timun',
+                'Sambal',
+                'Kremesan'
+            ]
+        };
+
+        let menuItems = [];
+        let orders = [];
+        let invoices = [];
+
+        // --- Helper Functions ---
+        function showNotification(msg, duration = 2500) {
+            const notif = document.getElementById('notification');
+            notif.innerText = msg;
+            notif.style.display = 'block';
+            setTimeout(() => notif.style.display = 'none', duration);
+        }
+        function formatStatus(status) {
+            switch(status) {
+                case "Pending": return `<span class="status-badge status-pending">Pending</span>`;
+                case "Cooking": return `<span class="status-badge status-cooking">Cooking</span>`;
+                case "Ready": return `<span class="status-badge status-ready">Ready</span>`;
+                case "Completed": return `<span class="status-badge status-completed">Completed</span>`;
+                default: return status;
+            }
+        }
+        function formatDateTime(ts) {
+            if (!ts) return '';
+            let d = ts instanceof Date ? ts : (ts && ts.seconds ? new Date(ts.seconds*1000) : new Date(ts));
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        }
+        function calcOrderTotal(order) {
+            let total = 0;
+            for (const pkg of order.packages) {
+                const mi = menuItems.find(m => m.id === pkg.menuId);
+                if (mi) total += mi.price * pkg.qty;
+            }
+            for (const ac of order.alacarte) {
+                const mi = menuItems.find(m => m.id === ac.menuId);
+                if (mi) total += mi.price * ac.qty;
+            }
+            return total;
+        }
+        function autoFileNameReport(type, start, end) {
+            let s = start ? start.replaceAll('-', '_') : '';
+            let e = end ? end.replaceAll('-', '_') : '';
+            return `report_${type}_${s}_${e}.xlsx`;
+        }
+        // --- Section Switching ---
+        const sections = ['admin-section','kitchen-section','reports-section','menu-section'];
+        function showSection(secId) {
+            sections.forEach(id => {
+                document.getElementById(id).classList.remove('active');
+            });
+            document.getElementById(secId).classList.add('active');
+            window.scrollTo(0,0);
+            renderAdminOrders();
+            renderKitchenOrders();
+        }
+        document.getElementById('nav-admin').onclick = () => showSection('admin-section');
+        document.getElementById('nav-kitchen').onclick = () => showSection('kitchen-section');
+        document.getElementById('nav-reports').onclick = () => showSection('reports-section');
+        document.getElementById('nav-menu').onclick = () => showSection('menu-section');
+
+        // --- Menu Rendering ---
+        function renderMenus() {
+            const pkgList = document.getElementById('package-menu-list');
+            const acList = document.getElementById('alacarte-menu-list');
+            pkgList.innerHTML = '';
+            acList.innerHTML = '';
+            for (const mi of menuItems.filter(m => m.type === 'package')) {
+                pkgList.innerHTML += `
+                    <div class="menu-item">
+                        <div class="menu-item-title">${mi.name}</div>
+                        <div class="menu-item-price">¥${mi.price}</div>
+                        <div class="menu-item-desc">${mi.desc}</div>
+                        <ul class="detailed-list">
+                            ${menuDetails[mi.name] ? menuDetails[mi.name].map(i => `<li>${i}</li>`).join('') : ''}
+                        </ul>
+                        <div class="menu-item-select">
+                            <label for="pkg_${mi.id}_qty">Qty</label>
+                            <input type="number" min="0" value="0" id="pkg_${mi.id}_qty">
+                        </div>
+                    </div>
+                `;
+            }
+            for (const mi of menuItems.filter(m => m.type === 'alacarte')) {
+                acList.innerHTML += `
+                    <div class="menu-item">
+                        <div class="menu-item-title">${mi.name}</div>
+                        <div class="menu-item-price">¥${mi.price}</div>
+                        <div class="menu-item-desc">${mi.desc}</div>
+                        <div class="menu-item-select">
+                            <label for="ac_${mi.id}_qty">Qty</label>
+                            <input type="number" min="0" value="0" id="ac_${mi.id}_qty">
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        function renderMenuTable() {
+            const tb = document.getElementById('menu-table').getElementsByTagName('tbody')[0];
+            tb.innerHTML = '';
+            for (const mi of menuItems) {
+                tb.innerHTML += `<tr>
+                    <td>${mi.type.charAt(0).toUpperCase()+mi.type.slice(1)}</td>
+                    <td>${mi.name}</td>
+                    <td>${mi.desc}</td>
+                    <td>¥${mi.price}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="removeMenuItem('${mi.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }
+        }
+        window.removeMenuItem = async function(id) {
+            await db.collection('menu').doc(id).delete();
+            showNotification('Menu item removed!');
+        };
+        document.getElementById('menu-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const type = document.getElementById('menu-type').value;
+            const name = document.getElementById('menu-name').value.trim();
+            const desc = document.getElementById('menu-desc').value.trim();
+            const price = Number(document.getElementById('menu-price').value);
+            if (!name || isNaN(price) || price <= 0) return showNotification('Invalid menu item!');
+            const id = `${type}_${name.replace(/\s+/g,'_').toLowerCase()}_${Math.floor(Math.random()*100000)}`;
+            await db.collection('menu').doc(id).set({id, type, name, desc, price});
+            showNotification('Menu item added!');
+            document.getElementById('menu-form').reset();
+        };
+
+        // --- Orders ---
+        function renderAdminOrders() {
+            renderOrdersTable('admin-orders-table-pending', orders.filter(o=>o.status==='Pending'));
+            renderOrdersTable('admin-orders-table-cooking', orders.filter(o=>o.status==='Cooking'));
+            renderOrdersTable('admin-orders-table-ready', orders.filter(o=>o.status==='Ready'));
+            renderOrdersTable('admin-orders-table-completed', orders.filter(o=>o.status==='Completed'), true);
+        }
+        function renderKitchenOrders() {
+            renderOrdersTableKitchen('kitchen-orders-table-pending', orders.filter(o=>o.status==='Pending'));
+            renderOrdersTableKitchen('kitchen-orders-table-cooking', orders.filter(o=>o.status==='Cooking'));
+            renderOrdersTableKitchen('kitchen-orders-table-ready', orders.filter(o=>o.status==='Ready'));
+            renderOrdersTableKitchen('kitchen-orders-table-completed', orders.filter(o=>o.status==='Completed'), true);
+        }
+        function renderOrdersTable(tableId, orderArr, showInvoice) {
+            const tb = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            tb.innerHTML = '';
+            const sorted = orderArr.slice().sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds);
+            for (const ord of sorted) {
+                tb.innerHTML += `<tr>
+                    <td>${ord.id}</td>
+                    <td>${ord.customer}</td>
+                    <td>
+                        ${renderOrderDetails(ord)}
+                    </td>
+                    <td>${formatDateTime(ord.deliveryTime)}</td>
+                    <td>${formatStatus(ord.status)}</td>
+                    <td>${formatDateTime(ord.createdAt)}</td>
+                    ${showInvoice ? `<td>
+                        <button class="btn btn-secondary" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i> Download</button>
+                    </td>` : ''}
+                </tr>`;
+            }
+        }
+        function renderOrdersTableKitchen(tableId, orderArr, showInvoice, showTelegram) {
+            const tb = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            tb.innerHTML = '';
+            const sorted = orderArr.slice().sort((a,b)=>b.createdAt.seconds-a.createdAt.seconds);
+            for (const ord of sorted) {
+                tb.innerHTML += `<tr>
+                    <td>${ord.id}</td>
+                    <td>${ord.customer}</td>
+                    <td>
+                        ${renderOrderDetails(ord)}
+                    </td>
+                    <td>${formatDateTime(ord.deliveryTime)}</td>
+                    <td>${formatStatus(ord.status)}</td>
+                    <td>${formatDateTime(ord.createdAt)}</td>
+                    <td class="actions">
+                        ${ord.status === 'Pending' ? `<button class="btn btn-secondary" onclick="updateOrderStatus('${ord.id}','Cooking')">Start Cooking</button>` : ''}
+                        ${ord.status === 'Cooking' ? `<button class="btn btn-secondary" onclick="updateOrderStatus('${ord.id}','Ready')">Ready</button>` : ''}
+                        ${ord.status === 'Ready' ? `<button class="btn btn-secondary" onclick="updateOrderStatus('${ord.id}','Completed')">Complete</button>` : ''}
+                        ${showInvoice ? `<button class="btn btn-secondary" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i></button>` : ''}
+                        ${showTelegram ? `<button class="btn btn-secondary" onclick="sendTelegram('${ord.id}')"><i class="fab fa-telegram"></i></button>` : ''}
+                    </td>
+                </tr>`;
+            }
+        }
+        function renderOrderDetails(ord) {
+            let html = '';
+            if (ord.packages.length) {
+                html += `<b>Package:</b> <ul class="detailed-list">`;
+                for (const pkg of ord.packages) {
+                    const mi = menuItems.find(m => m.id === pkg.menuId);
+                    if (mi) {
+                        html += `<li><b>${mi.name} x${pkg.qty}</b>`;
+                        if (menuDetails[mi.name]) {
+                            html += `<ul class="detailed-list">${menuDetails[mi.name].map(i=>`<li>${i}</li>`).join('')}</ul>`;
+                        }
+                        html += `</li>`;
+                    }
+                }
+                html += `</ul>`;
+            }
+            if (ord.alacarte.length) {
+                html += `<b>Ala Carte:</b> <ul class="detailed-list">`;
+                for (const ac of ord.alacarte) {
+                    const mi = menuItems.find(m => m.id === ac.menuId);
+                    if (mi) {
+                        html += `<li>${mi.name} x${ac.qty}</li>`;
+                    }
+                }
+                html += `</ul>`;
+            }
+            html += `<b>Notes:</b> ${ord.notes || '-'}`;
+            return html;
+        }
+        window.updateOrderStatus = async function(orderId, newStatus) {
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return;
+            let updateObj = { status: newStatus };
+            updateObj[`${newStatus.toLowerCase()}At`] = firebase.firestore.FieldValue.serverTimestamp();
+            if (newStatus === 'Completed') {
+                updateObj.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+            await db.collection('orders').doc(orderId).update(updateObj);
+            showNotification(`Order ${orderId} status updated to ${newStatus}`);
+        };
+
+        // --- Order Form ---
+        document.getElementById('order-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const customer = document.getElementById('customer-name').value.trim();
+            const deliveryTime = document.getElementById('delivery-time').value;
+            const deliveryLocation = document.getElementById('delivery-location').value.trim();
+            const notes = document.getElementById('order-notes').value.trim();
+            const packages = [];
+            for (const mi of menuItems.filter(m=>m.type==='package')) {
+                const qty = Number(document.getElementById(`pkg_${mi.id}_qty`).value);
+                if (qty > 0) packages.push({menuId: mi.id, qty});
+            }
+            const alacarte = [];
+            for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
+                const qty = Number(document.getElementById(`ac_${mi.id}_qty`).value);
+                if (qty > 0) alacarte.push({menuId: mi.id, qty});
+            }
+            if (!customer || !deliveryTime || !deliveryLocation || (!packages.length && !alacarte.length)) {
+                showNotification('Please fill all required fields and select items.');
+                return;
+            }
+            const oid = `ORD_${Date.now().toString().slice(-8)}`;
+            const order = {
+                id: oid,
+                customer,
+                deliveryTime: deliveryTime,
+                deliveryLocation,
+                notes,
+                packages,
+                alacarte,
+                status: 'Pending',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                kitchenNotes: []
+            };
+            await db.collection('orders').doc(oid).set(order);
+            showNotification('Order sent to kitchen!');
+            document.getElementById('order-form').reset();
+            renderMenus();
+        };
+
+        // --- Excel Export ---
+        document.getElementById('export-excel-btn').onclick = function() {
+            let start = document.getElementById('report-start').value;
+            let end = document.getElementById('report-end').value;
+            let type = document.getElementById('report-type').value;
+            let filtered = orders.filter(ord => {
+                let t = ord.createdAt && ord.createdAt.seconds ? new Date(ord.createdAt.seconds*1000) : new Date(ord.createdAt);
+                let s = start ? new Date(start) : null;
+                let e = end ? new Date(end) : null;
+                return (!s || t >= s) && (!e || t <= e);
+            });
+            let data = filtered.map(ord => ({
+                "Order ID": ord.id,
+                "Date": formatDateTime(ord.createdAt),
+                "Customer": ord.customer,
+                "Order Details": 
+                    "Package: " + ord.packages.map(p => {
+                        const mi = menuItems.find(m => m.id === p.menuId); 
+                        return mi ? `${mi.name} x${p.qty}` : '';
+                    }).join(', ') +
+                    "; Ala Carte: " + ord.alacarte.map(a => {
+                        const mi = menuItems.find(m => m.id === a.menuId);
+                        return mi ? `${mi.name} x${a.qty}` : '';
+                    }).join(', '),
+                "Status": ord.status,
+                "Delivery Time": formatDateTime(ord.deliveryTime),
+                "Timestamp Pending": formatDateTime(ord.createdAt),
+                "Timestamp Cooking": formatDateTime(ord.cookingAt),
+                "Timestamp Ready": formatDateTime(ord.readyAt),
+                "Timestamp Completed": formatDateTime(ord.completedAt)
+            }));
+            let ws = XLSX.utils.json_to_sheet(data);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Orders");
+            let filename = autoFileNameReport(type, start, end);
+            XLSX.writeFile(wb, filename);
+            showNotification('Excel report exported!');
+        };
+
+        // --- Invoice Generation (PDF) ---
+        function generateInvoice(orderId) {
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return;
+            const total = calcOrderTotal(ord);
+            const invoiceId = `INV_${orderId}`;
+            const invoice = {
+                invoiceId,
+                orderId,
+                customer: ord.customer,
+                totalPrice: total,
+                completedTime: ord.completedAt || new Date(),
+                details: {
+                    packages: ord.packages,
+                    alacarte: ord.alacarte
+                }
+            };
+            invoices.unshift(invoice);
+            renderInvoicesTable();
+        }
+        function renderInvoicesTable() {
+            const tb = document.getElementById('invoices-table').getElementsByTagName('tbody')[0];
+            tb.innerHTML = '';
+            for (const inv of invoices) {
+                tb.innerHTML += `<tr>
+                    <td>${inv.invoiceId}</td>
+                    <td>${inv.orderId}</td>
+                    <td>${inv.customer}</td>
+                    <td>¥${inv.totalPrice}</td>
+                    <td>${formatDateTime(inv.completedTime)}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="downloadInvoicePdf('${inv.orderId}')"><i class="fas fa-file-pdf"></i> Download</button>
+                    </td>
+                </tr>`;
+            }
+        }
+        window.downloadInvoicePdf = function(orderId) {
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return showNotification('Order not found!');
+            const total = calcOrderTotal(ord);
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFont('helvetica','bold');
+            doc.setFontSize(18);
+            doc.text('Cita Rasa Indo Catering Invoice', 20, 20);
+            doc.setFontSize(12);
+            doc.setFont('helvetica','normal');
+            doc.text(`Invoice ID: INV_${orderId}`, 20, 30);
+            doc.text(`Customer: ${ord.customer}`, 20, 38);
+            doc.text(`Delivery Location: ${ord.deliveryLocation}`, 20, 46);
+            doc.text(`Delivery Time: ${formatDateTime(ord.deliveryTime)}`, 20, 54);
+            doc.text(`Completed: ${formatDateTime(ord.completedAt)}`, 20, 62);
+            doc.text('Order Details:', 20, 70);
+            let y = 78;
+            for (const pkg of ord.packages) {
+                const mi = menuItems.find(m => m.id === pkg.menuId);
+                if (mi) {
+                    doc.text(`Package: ${mi.name} x${pkg.qty} @¥${mi.price}`, 25, y);
+                    y += 8;
+                    if (menuDetails[mi.name]) {
+                        for (const detail of menuDetails[mi.name]) {
+                            doc.text(`- ${detail}`, 30, y);
+                            y += 6;
+                        }
+                    }
+                }
+            }
+            for (const ac of ord.alacarte) {
+                const mi = menuItems.find(m => m.id === ac.menuId);
+                if (mi) {
+                    doc.text(`Ala Carte: ${mi.name} x${ac.qty} @¥${mi.price}`, 25, y);
+                    y += 8;
+                }
+            }
+            doc.text(`Total Price: ¥${total}`, 20, y+5);
+            doc.save(`invoice_${orderId}.pdf`);
+            showNotification('Invoice downloaded!');
+        };
+
+        // --- Telegram Send ---
+        window.sendTelegram = function(orderId) {
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return showNotification('Order not found!');
+            let msg = '🕺🏻👋🏻 GROUP ORDER INTERNAL 🕺🏻👋🏻\n\n';
+            msg += `Pesanan Selesai #${ord.id}\n`;
+            msg += `Customer: ${ord.customer}\nDelivery Location: ${ord.deliveryLocation}\nDelivery Time: ${formatDateTime(ord.deliveryTime)}\n\n`;
+            msg += `Order:\n`;
+            for (const pkg of ord.packages) {
+                const mi = menuItems.find(m => m.id === pkg.menuId);
+                if (mi) {
+                    msg += `- ${mi.name} x${pkg.qty}\n`;
+                    if (menuDetails[mi.name]) {
+                        for (const detail of menuDetails[mi.name]) {
+                            msg += `   • ${detail}\n`;
+                        }
+                    }
+                }
+            }
+            for (const ac of ord.alacarte) {
+                const mi = menuItems.find(m => m.id === ac.menuId);
+                if (mi) {
+                    msg += `- ${mi.name} x${ac.qty}\n`;
+                }
+            }
+            msg += `Notes: ${ord.notes || '-'}\n`;
+            msg += `Total: ¥${calcOrderTotal(ord)}\n`;
+
+            const botToken = "7977280306:AAFG8qAVnSD81p73iFP3wRceOP-605auqQ0";
+            const chatId = "-1002880911209"; // Group ID for GROUP ORDER INTERNAL
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `chat_id=${encodeURIComponent(chatId)}&text=${encodeURIComponent(msg)}`
+            }).then(r=>r.json()).then(data=>{
+                if (data.ok) {
+                    showNotification('Pesan Telegram sukses!');
+                } else {
+                    showNotification('Gagal kirim Telegram: ' + JSON.stringify(data));
+                }
+            }).catch(e=>{
+                showNotification('Gagal kirim Telegram: ' + e.message);
+            });
+        };
+
+        // --- Real-time Sync Firestore ---
+        db.collection('menu').onSnapshot(snap => {
+            menuItems = snap.docs.map(doc => doc.data());
+            renderMenus();
+            renderMenuTable();
+        });
+        db.collection('orders').onSnapshot(snap => {
+            orders = snap.docs.map(doc => doc.data());
+            renderAdminOrders();
+            renderKitchenOrders();
+        });
+        db.collection('invoices').onSnapshot(snap => {
+            invoices = snap.docs.map(doc => doc.data());
+            renderInvoicesTable();
+        });
+
+        // --- Initial Load ---
+        function initialLoad() {
+            renderMenus();
+            renderMenuTable();
+            renderAdminOrders();
+            renderKitchenOrders();
+            renderInvoicesTable();
+        }
+        initialLoad();
+    </script>
+</body>
+</html>
