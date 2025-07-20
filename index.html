@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cita Rasa Indo Catering - Sync & Telegram</title>
+    <title>Cita Rasa Indo Catering - Seeded Menu & Sync</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -288,7 +288,6 @@
             margin-bottom: 0.3rem;
             color: var(--primary);
         }
-        /* Responsive Styles */
         @media (max-width: 900px) {
             .container { padding: 1rem 0.5rem; }
             .card { padding: 1rem; }
@@ -321,7 +320,7 @@
     <header>
         <div class="logo-title">
             <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" alt="Cita Rasa Indo Logo">
-            <h1>CRI</h1>
+            <h1>Cita Rasa Indo Catering Admin</h1>
         </div>
         <nav>
             <button id="nav-admin" class="active"><i class="fas fa-user-cog"></i> Admin Dashboard</button>
@@ -618,6 +617,23 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // --- MENU DATA ---
+        const defaultMenuSeed = [
+            {id:"package_payalur",type:"package",name:"PAYALUR",desc:"Nasi, Ayam Goreng, Telur Balado, Bakwan/Kentang, Sayur, Sambal",price:75},
+            {id:"package_payalit",type:"package",name:"PAYALIT",desc:"Nasi, Ayam Goreng, Telur/Bakwan, Sayur, Sambal",price:70},
+            {id:"package_payamat",type:"package",name:"PAYAMAT",desc:"Nasi, Ayam Goreng, Sayur, Sambal",price:65},
+            {id:"package_palutang",type:"package",name:"PALUTANG",desc:"Nasi, Telur Balado, Kentang Balado, Bakwan Sayur, Sayur",price:60},
+            {id:"package_palur",type:"package",name:"PALUR",desc:"Nasi, Telur Balado, Bakwan Sayur, Sayur",price:55},
+            {id:"package_prames_a",type:"package",name:"PRAMES A",desc:"Nasi, Ayam Goreng, Tahu, Timun, Sambal, Kremesan",price:80},
+            {id:"package_prames_b",type:"package",name:"PRAMES B",desc:"Nasi, Ayam Goreng, Telur Balado, Tahu, Timun, Sambal, Kremesan",price:85},
+            {id:"package_prames_c",type:"package",name:"PRAMES C",desc:"Nasi, Ayam Goreng, Kentang Balado, Tahu, Timun, Sambal, Kremesan",price:90},
+            {id:"package_prames_veggie",type:"package",name:"PRAMES VEGGIE",desc:"Nasi, Tahu, Timun, Sambal, Kremesan",price:60},
+            {id:"alacarte_ayam_goreng",type:"alacarte",name:"Ayam Goreng",desc:"Ala Carte",price:25},
+            {id:"alacarte_telur_balado",type:"alacarte",name:"Telur Balado",desc:"Ala Carte",price:15},
+            {id:"alacarte_bakwan_sayur",type:"alacarte",name:"Bakwan Sayur",desc:"Ala Carte",price:15},
+            {id:"alacarte_kentang_balado",type:"alacarte",name:"Kentang Balado",desc:"Ala Carte",price:20},
+            {id:"alacarte_tahu",type:"alacarte",name:"Tahu",desc:"Ala Carte",price:10}
+        ];
         const menuDetails = {
             'PAYALUR': [
                 'Nasi Putih',
@@ -692,7 +708,22 @@
         let orders = [];
         let invoices = [];
         let telegramSentIds = new Set();
+        let menuSeeded = false;
 
+        // --- SEED MENU ON FIRST LOAD ---
+        async function seedMenuIfNeeded() {
+            const snap = await db.collection('menu').get();
+            if (snap.empty) {
+                for (const mi of defaultMenuSeed) {
+                    await db.collection('menu').doc(mi.id).set(mi);
+                }
+                menuSeeded = true;
+                showNotification("Menu default berhasil di-seed! Silakan refresh di device lain.");
+            }
+        }
+        seedMenuIfNeeded();
+
+        // --- Helper Functions ---
         function showNotification(msg, duration = 2500) {
             const notif = document.getElementById('notification');
             notif.innerText = msg;
