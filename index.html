@@ -350,6 +350,9 @@
             cursor: pointer;
             transition: background 0.2s;
         }
+        .btn:hover {
+            background: var(--primary-dark);
+        }
         .btn:disabled {
             background: #ffb97a;
             cursor: not-allowed;
@@ -357,6 +360,9 @@
         .btn-secondary {
             background: var(--secondary);
             color: var(--primary-dark);
+        }
+        .btn-secondary:hover {
+            background: var(--border);
         }
         .table-responsive {
             width: 100%;
@@ -650,16 +656,18 @@
             .menu-list { grid-template-columns: 1fr; gap: 0.7rem; }
             table { font-size: 0.92rem; }
             th, td { padding: 0.5rem 0.3rem; }
-            .footer { padding: 1rem 0.5rem; font-size: 0.93rem; }
         }
         @media (max-width: 430px) {
             .container { padding: 0.1rem 0; }
             .menu-item-title { font-size: 0.99rem; }
-            .footer { font-size: 0.85rem; padding: 0.7rem 0.2rem; }
             th, td { font-size: 0.85rem; }
         }
-        .section { display: none; }
-        .section.active { display: block; }
+        .section { 
+            display: none; 
+        }
+        .section.active { 
+            display: block; 
+        }
         .order-history-log {
             font-size: 0.93rem;
             background: #f7ebd6;
@@ -701,6 +709,16 @@
             box-shadow: 0 4px 24px rgba(60,20,20,0.15);
             padding: 1.1rem 2.8rem;
             font-size: 1.18rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .floating-bottom-btn:hover {
+            background: var(--primary-dark);
         }
         .floating-bottom-btn.hide {
             display: none;
@@ -778,40 +796,6 @@
             .modal-summary-details { font-size: 0.97rem; }
             .modal-total { font-size: 1.05rem; }
         }
-        .searchable-select {
-            width: 100%;
-            min-width: 220px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            background: #fff;
-            padding: 0.5rem 0.8rem;
-        }
-        .searchable-select-input {
-            width: 100%;
-            border: none;
-            outline: none;
-            font-size: 1rem;
-            background: transparent;
-            margin-bottom: 0.6rem;
-        }
-        .searchable-select-list {
-            max-height: 180px;
-            overflow-y: auto;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            background: #fff;
-            margin-top: 0.1rem;
-            z-index: 1000;
-            position: relative;
-        }
-        .searchable-select-item {
-            padding: 0.6rem 1rem;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .searchable-select-item:hover {
-            background: var(--secondary);
-        }
         .pagination-bar {
             display: flex;
             gap: 0.7rem;
@@ -867,13 +851,6 @@
         @keyframes loading-bar-cooking {
             0% { background-position: 0;}
             100% { background-position: 100;}
-        }
-        .infinite-loader {
-            width: 100%;
-            text-align: center;
-            margin: 1rem 0;
-            font-size: 1.08rem;
-            color: var(--primary-dark);
         }
     </style>
 </head>
@@ -934,7 +911,7 @@
                             <input type="text" id="delivery-location" required>
                         </div>
                     </div>
-                    <!-- Searchable Dropdown for Menu Items -->
+                    <!-- Menu Panels -->
                     <div class="menu-section">
                         <div class="menu-panel" id="package-menu-panel">
                             <div class="menu-panel-header" onclick="toggleMenuPanel('package')">
@@ -957,7 +934,7 @@
                     </div>
                     <button type="submit" class="btn" id="send-to-kitchen-btn" style="display:none;">Send to Kitchen</button>
                 </form>
-                <button type="button" class="btn floating-bottom-btn btn" id="floating-send-to-kitchen-btn">
+                <button type="button" class="btn floating-bottom-btn" id="floating-send-to-kitchen-btn">
                     <i class="fas fa-paper-plane"></i> Send to Kitchen
                 </button>
                 <div class="divider"></div>
@@ -1213,7 +1190,7 @@
         </div>
     </main>
     <script>
-        // Global Variables - MUST BE INITIALIZED FIRST
+        // Global Variables
         let orders = [];
         let invoices = [];
         let menuItems = [];
@@ -1225,21 +1202,13 @@
         let previousOrderData = null;
         let adminOrdersPage = 1;
         let kitchenOrdersPage = 1;
-        let infiniteLoading = false;
-        let infinitePage = 1;
-        let infiniteOrders = [];
         let sidebarOpen = false;
-
-        // Sidebar and layout elements
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
 
         // Constants
         const DEFAULT_TZ = 'Asia/Bangkok';
         const PAGE_SIZE = 8;
 
-        // --- Firebase Configuration ---
+        // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBoDQI5RgVlDOgYfs4qBIEjJPEBJG_rSJU",
             authDomain: "cita-rasa-indo.firebaseapp.com",
@@ -1249,8 +1218,6 @@
             appId: "1:34181971563:web:eb1f554ba6bbcc9c797b2e",
             measurementId: "G-N82XGK7SZY"
         };
-
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -1258,7 +1225,12 @@
         dayjs.extend(dayjs_plugin_utc);
         dayjs.extend(dayjs_plugin_timezone);
 
-        // --- Utility Functions ---
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        // Utility Functions
         function showNotification(msg, duration = 2500, type = 'info') {
             const notif = document.getElementById('notification');
             notif.innerText = msg;
@@ -1280,26 +1252,6 @@
                 case "Ready": return `<span class="status-badge status-ready">Ready</span>`;
                 case "Completed": return `<span class="status-badge status-completed">Completed</span>`;
                 default: return status;
-            }
-        }
-
-        function getOrderProgressPercent(status) {
-            switch(status) {
-                case "Pending": return 12;
-                case "Cooking": return 50;
-                case "Ready": return 80;
-                case "Completed": return 100;
-                default: return 0;
-            }
-        }
-
-        function getOrderProgressClass(status) {
-            switch(status) {
-                case "Pending": return "order-progress-pending";
-                case "Cooking": return "order-progress-cooking";
-                case "Ready": return "order-progress-ready";
-                case "Completed": return "order-progress-completed";
-                default: return "order-progress-pending";
             }
         }
 
@@ -1331,12 +1283,6 @@
             return total;
         }
 
-        function autoFileNameReport(type, start, end, format) {
-            let s = start ? start.replaceAll('-', '_') : '';
-            let e = end ? end.replaceAll('-', '_') : '';
-            return `report_${type}_${s}_${e}.${format}`;
-        }
-
         function setDefaultDeliveryTime() {
             const input = document.getElementById('delivery-time');
             if (!input) return;
@@ -1345,7 +1291,7 @@
             input.value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
         }
 
-        // --- Sidebar Navigation Functions ---
+        // Sidebar Functions
         function openSidebar() {
             sidebar.classList.remove('collapsed');
             sidebarOverlay.classList.remove('hide');
@@ -1371,46 +1317,69 @@
         }
 
         function showSection(secId) {
-            console.log('Showing section:', secId); // Debug log
+            console.log('Switching to section:', secId);
             ['admin-section','kitchen-section','reports-section','menu-section'].forEach(id => {
-                document.getElementById(id).classList.remove('active');
+                const element = document.getElementById(id);
+                if (element) {
+                    element.classList.remove('active');
+                }
             });
-            document.getElementById(secId).classList.add('active');
+            const targetSection = document.getElementById(secId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                console.log('Section', secId, 'is now active');
+            } else {
+                console.error('Section not found:', secId);
+            }
             window.scrollTo(0,0);
+            // Call render functions if they exist
             if (typeof renderAdminOrders === 'function') renderAdminOrders();
             if (typeof renderKitchenOrders === 'function') renderKitchenOrders();
             handleFloatingBtnVisibility();
             if(secId === 'reports-section' && typeof renderInvoicesTable === 'function') renderInvoicesTable();
         }
 
-        // --- Panel Functions ---
+        // Panel Functions
         function toggleMenuPanel(type) {
             const panelContent = document.getElementById(type + '-menu-list');
             const arrow = document.getElementById(type + '-panel-arrow');
-            if (panelContent.classList.contains('hide')) {
-                panelContent.classList.remove('hide');
-                arrow.innerHTML = '<i class="fas fa-chevron-down"></i>';
-            } else {
-                panelContent.classList.add('hide');
-                arrow.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            if (panelContent && arrow) {
+                if (panelContent.classList.contains('hide')) {
+                    panelContent.classList.remove('hide');
+                    arrow.innerHTML = '<i class="fas fa-chevron-down"></i>';
+                } else {
+                    panelContent.classList.add('hide');
+                    arrow.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                }
             }
         }
 
-        // --- Menu Functions ---
+        // Menu Functions
         window.changeQty = function(inputId, delta) {
             const input = document.getElementById(inputId);
             const display = document.getElementById(inputId + '_display');
-            let val = Number(input.value);
-            val = Math.max(0, val + delta);
-            input.value = val;
-            display.innerText = val;
+            if (input && display) {
+                let val = Number(input.value);
+                val = Math.max(0, val + delta);
+                input.value = val;
+                display.innerText = val;
+            }
         };
 
         function renderMenus() {
-            if (!menuItems || menuItems.length === 0) return;
+            if (!menuItems || menuItems.length === 0) {
+                console.log('No menu items to render');
+                return;
+            }
             
             const pkgList = document.getElementById('package-menu-list');
             const acList = document.getElementById('alacarte-menu-list');
+            
+            if (!pkgList || !acList) {
+                console.error('Menu containers not found');
+                return;
+            }
+            
             pkgList.innerHTML = '';
             acList.innerHTML = '';
             
@@ -1427,15 +1396,17 @@
                             <span id="pkg_${mi.id}_qty_display">0</span>
                             <button type="button" class="qty-btn" onclick="changeQty('pkg_${mi.id}_qty', 1)">&#43;</button>
                             <input type="hidden" id="pkg_${mi.id}_qty" value="0">
-                                                                </div>
+                        </div>
+                    </div>
                 `;
             }
+            
             for (const mi of menuItems.filter(m => m.type === 'alacarte')) {
                 acList.innerHTML += `
                     <div class="menu-item">
                         <div class="menu-item-title">${mi.name}</div>
                         <div class="menu-item-price">¥${mi.price}</div>
-                        <div class="menu-item-desc">${mi.desc}</div>
+                        <div class="menu-item-desc">${mi.desc || ''}</div>
                         <div class="menu-item-select">
                             <button type="button" class="qty-btn" onclick="changeQty('ac_${mi.id}_qty', -1)">&#8722;</button>
                             <span id="ac_${mi.id}_qty_display">0</span>
@@ -1445,18 +1416,22 @@
                     </div>
                 `;
             }
+            console.log('Menus rendered successfully');
         }
 
         function renderMenuTable() {
-            if (!menuItems || menuItems.length === 0) return;
+            const menuTable = document.getElementById('menu-table');
+            if (!menuTable || !menuItems) return;
             
-            const tb = document.getElementById('menu-table').getElementsByTagName('tbody')[0];
+            const tb = menuTable.getElementsByTagName('tbody')[0];
+            if (!tb) return;
+            
             tb.innerHTML = '';
             for (const mi of menuItems) {
                 tb.innerHTML += `<tr>
                     <td>${mi.type.charAt(0).toUpperCase()+mi.type.slice(1)}</td>
                     <td>${mi.name}</td>
-                    <td>${mi.desc}</td>
+                    <td>${mi.desc || ''}</td>
                     <td>¥${mi.price}</td>
                     <td>
                         <button class="btn btn-secondary" onclick="showMenuEditModal('${mi.id}')"><i class="fas fa-edit"></i></button>
@@ -1472,38 +1447,24 @@
             if (!mi) return showNotification('Menu not found!', 2500, 'error');
             document.getElementById('edit-menu-type').value = mi.type;
             document.getElementById('edit-menu-name').value = mi.name;
-            document.getElementById('edit-menu-desc').value = mi.desc;
+            document.getElementById('edit-menu-desc').value = mi.desc || '';
             document.getElementById('edit-menu-price').value = mi.price;
             document.getElementById('menu-edit-modal').style.display = 'flex';
         };
 
         window.removeMenuItem = async function(id) {
-            await db.collection('menu').doc(id).delete();
-            showNotification('Menu item removed!', 2000, 'success');
+            if (confirm('Are you sure you want to delete this menu item?')) {
+                await db.collection('menu').doc(id).delete();
+                showNotification('Menu item removed!', 2000, 'success');
+            }
         };
 
-        // --- Order Functions ---
-        function renderPaginationBar(total, page, cb, barId) {
-            const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
-            const bar = document.getElementById(barId);
-            bar.innerHTML = '';
-            if (totalPages > 1) {
-                if (page > 1)
-                    bar.innerHTML += `<button class="pagination-btn" onclick="${cb}(${page-1})">&laquo; Prev</button>`;
-                for (let i=1;i<=totalPages;i++) {
-                    bar.innerHTML += `<button class="pagination-btn${i===page?' active':''}" onclick="${cb}(${i})">${i}</button>`;
-                }
-                if (page < totalPages)
-                    bar.innerHTML += `<button class="pagination-btn" onclick="${cb}(${page+1})">Next &raquo;</button>`;
-            }
-        }
-
+        // Order Rendering Functions
         function renderAdminOrders(page=1) {
             adminOrdersPage = page;
             if (!orders) return;
             
             let pendingOrders = orders.filter(o=>o.status==='Pending');
-            renderPaginationBar(pendingOrders.length, adminOrdersPage, "renderAdminOrders", "admin-orders-pagination-bar");
             renderOrdersTable('admin-orders-table-pending', pendingOrders.slice((adminOrdersPage-1)*PAGE_SIZE, adminOrdersPage*PAGE_SIZE), true);
 
             let cookingOrders = orders.filter(o=>o.status==='Cooking');
@@ -1521,75 +1482,19 @@
             if (!orders) return;
             
             let pendingOrders = orders.filter(o=>o.status==='Pending');
-            renderPaginationBar(pendingOrders.length, kitchenOrdersPage, "renderKitchenOrders", "kitchen-orders-pagination-bar");
             renderKitchenOrderCards('kitchen-pending-order-list', pendingOrders.slice((kitchenOrdersPage-1)*PAGE_SIZE, kitchenOrdersPage*PAGE_SIZE));
             renderKitchenOrderCards('kitchen-cooking-order-list', orders.filter(o=>o.status==='Cooking'));
             renderKitchenOrderCards('kitchen-ready-order-list', orders.filter(o=>o.status==='Ready'));
             renderKitchenOrderCards('kitchen-completed-order-list', orders.filter(o=>o.status==='Completed'), true);
         }
 
-        function renderKitchenOrderCards(containerId, orderArr, showInvoice) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            const sorted = orderArr.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-            for (const ord of sorted) {
-                container.innerHTML += kitchenOrderCardHtml(ord, showInvoice);
-            }
-        }
-
-        function kitchenOrderCardHtml(ord, showInvoice) {
-            return `
-            <div class="kitchen-order-card">
-                <div><b>Order ID:</b> ${ord.id}</div>
-                <div><b>Customer:</b> ${ord.customer}</div>
-                <div class="order-progress">
-                    <div class="order-progress-inner ${getOrderProgressClass(ord.status)}" style="width:${getOrderProgressPercent(ord.status)}%;"></div>
-                </div>
-                <div><b>Details:</b> ${renderOrderDetailsKitchen(ord)}</div>
-                <div><b>Delivery:</b> ${formatDateTime(ord.deliveryTime)}</div>
-                <div><b>Status:</b> ${formatStatus(ord.status)}</div>
-                ${ord.notes && ord.notes.trim() !== "" ? `<div class="kitchen-order-notes"><b>Notes:</b> ${ord.notes}</div>` : ''}
-                <div class="kitchen-order-actions">
-                    ${ord.status === 'Pending' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Cooking', this)">Start Cooking</button>` : ''}
-                    ${ord.status === 'Cooking' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Ready', this)">Ready for Delivery</button>` : ''}
-                    ${ord.status === 'Ready' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Completed', this)">Complete Order</button>` : ''}
-                    ${showInvoice ? `<button class="action-btn" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i> Invoice PDF</button>` : ''}
-                </div>
-            </div>
-            `;
-        }
-
-        function renderOrderDetailsKitchen(ord) {
-            let html = '';
-            if (ord.packages && ord.packages.length) {
-                html += `<b>Package:</b><ul class="detailed-list">`;
-                for (const pkg of ord.packages) {
-                    const mi = menuItems.find(m => m.id === pkg.menuId);
-                    if (mi) {
-                        html += `<li><b>${mi.name} x${pkg.qty}</b>`;
-                        if (menuDetails[mi.name]) {
-                            html += `<ul class="detailed-list">${menuDetails[mi.name].map(i=>`<li>${i}</li>`).join('')}</ul>`;
-                        }
-                        html += `</li>`;
-                    }
-                }
-                html += `</ul>`;
-            }
-            if (ord.alacarte && ord.alacarte.length) {
-                html += `<b>Ala Carte:</b><ul class="detailed-list">`;
-                for (const ac of ord.alacarte) {
-                    const mi = menuItems.find(m => m.id === ac.menuId);
-                    if (mi) {
-                        html += `<li>${mi.name} x${ac.qty}</li>`;
-                    }
-                }
-                html += `</ul>`;
-            }
-            return html;
-        }
-
         function renderOrdersTable(tableId, orderArr, editable, showInvoice) {
-            const tb = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            
+            const tb = table.getElementsByTagName('tbody')[0];
+            if (!tb) return;
+            
             tb.innerHTML = '';
             const sorted = orderArr.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
             for (const ord of sorted) {
@@ -1601,7 +1506,7 @@
                     <td data-label="Status">${formatStatus(ord.status)}</td>
                     <td data-label="Progress">
                         <div class="order-progress">
-                            <div class="order-progress-inner ${getOrderProgressClass(ord.status)}" style="width:${getOrderProgressPercent(ord.status)}%;"></div>
+                            <div class="order-progress-inner order-progress-${ord.status.toLowerCase()}" style="width:${getOrderProgressPercent(ord.status)}%;"></div>
                         </div>
                     </td>
                     <td data-label="History"><div class="order-history-log">${renderOrderHistory(ord)}</div></td>
@@ -1616,6 +1521,39 @@
                     </td>` : ''}
                 </tr>`;
             }
+        }
+
+        function renderKitchenOrderCards(containerId, orderArr, showInvoice) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.innerHTML = '';
+            const sorted = orderArr.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+            for (const ord of sorted) {
+                container.innerHTML += kitchenOrderCardHtml(ord, showInvoice);
+            }
+        }
+
+        function kitchenOrderCardHtml(ord, showInvoice) {
+            return `
+            <div class="kitchen-order-card">
+                <div><b>Order ID:</b> ${ord.id}</div>
+                <div><b>Customer:</b> ${ord.customer}</div>
+                <div class="order-progress">
+                    <div class="order-progress-inner order-progress-${ord.status.toLowerCase()}" style="width:${getOrderProgressPercent(ord.status)}%;"></div>
+                </div>
+                <div><b>Details:</b> ${renderOrderDetailsKitchen(ord)}</div>
+                <div><b>Delivery:</b> ${formatDateTime(ord.deliveryTime)}</div>
+                <div><b>Status:</b> ${formatStatus(ord.status)}</div>
+                ${ord.notes && ord.notes.trim() !== "" ? `<div class="kitchen-order-notes"><b>Notes:</b> ${ord.notes}</div>` : ''}
+                <div class="kitchen-order-actions">
+                    ${ord.status === 'Pending' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Cooking', this)">Start Cooking</button>` : ''}
+                    ${ord.status === 'Cooking' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Ready', this)">Ready for Delivery</button>` : ''}
+                    ${ord.status === 'Ready' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Completed', this)">Complete Order</button>` : ''}
+                    ${showInvoice ? `<button class="action-btn" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i> Invoice PDF</button>` : ''}
+                </div>
+            </div>
+            `;
         }
 
         function renderOrderDetails(ord) {
@@ -1648,6 +1586,35 @@
             return html;
         }
 
+        function renderOrderDetailsKitchen(ord) {
+            let html = '';
+            if (ord.packages && ord.packages.length) {
+                html += `<b>Package:</b><ul class="detailed-list">`;
+                for (const pkg of ord.packages) {
+                    const mi = menuItems.find(m => m.id === pkg.menuId);
+                    if (mi) {
+                        html += `<li><b>${mi.name} x${pkg.qty}</b>`;
+                        if (menuDetails[mi.name]) {
+                            html += `<ul class="detailed-list">${menuDetails[mi.name].map(i=>`<li>${i}</li>`).join('')}</ul>`;
+                        }
+                        html += `</li>`;
+                    }
+                }
+                html += `</ul>`;
+            }
+            if (ord.alacarte && ord.alacarte.length) {
+                html += `<b>Ala Carte:</b><ul class="detailed-list">`;
+                for (const ac of ord.alacarte) {
+                    const mi = menuItems.find(m => m.id === ac.menuId);
+                    if (mi) {
+                        html += `<li>${mi.name} x${ac.qty}</li>`;
+                    }
+                }
+                html += `</ul>`;
+            }
+            return html;
+        }
+
         function renderOrderHistory(ord) {
             const logs = [];
             if (ord.createdAt) logs.push(`Pending: ${formatDateTime(ord.createdAt)}`);
@@ -1657,201 +1624,23 @@
             return logs.join('<br>');
         }
 
-        // --- Edit Order Functions ---
-        function showEditModeBar(orderId) {
-            document.getElementById('edit-mode-bar').style.display = 'flex';
-            document.getElementById('edit-order-id-bar').innerText = orderId;
-            document.getElementById('send-to-kitchen-btn').style.display = 'none';
-            document.getElementById('floating-send-to-kitchen-btn').classList.add('hide');
-            document.getElementById('order-form').querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
-        }
-
-        function hideEditModeBar() {
-            document.getElementById('edit-mode-bar').style.display = 'none';
-            document.getElementById('send-to-kitchen-btn').style.display = '';
-            editOrderMode = false;
-            editOrderId = null;
-            previousOrderData = null;
-            document.getElementById('order-form').reset();
-            setDefaultDeliveryTime();
-            renderMenus();
-            handleFloatingBtnVisibility();
-        }
-
-        window.editOrder = function(orderId) {
-            const ord = orders.find(o => o.id === orderId);
-            if (!ord) return showNotification('Order not found!', 2500, 'error');
-            if (ord.status !== "Pending") return showNotification('Order hanya bisa diedit saat status Pending!', 2500, 'error');
-            editOrderMode = true;
-            editOrderId = orderId;
-            previousOrderData = JSON.parse(JSON.stringify(ord));
-            showEditModeBar(orderId);
-            document.getElementById('customer-name').value = ord.customer;
-            document.getElementById('delivery-location').value = ord.deliveryLocation;
-            document.getElementById('order-notes').value = ord.notes || '';
-            let dtLocal = dayjs.utc(ord.deliveryTime).tz(DEFAULT_TZ).format('HH:mm');
-            document.getElementById('delivery-time').value = dtLocal;
-            for (const mi of menuItems.filter(m=>m.type==='package')) {
-                const pkg = ord.packages.find(p=>p.menuId===mi.id);
-                document.getElementById(`pkg_${mi.id}_qty`).value = pkg ? pkg.qty : 0;
-                document.getElementById(`pkg_${mi.id}_qty_display`).innerText = pkg ? pkg.qty : 0;
+        function getOrderProgressPercent(status) {
+            switch(status) {
+                case "Pending": return 12;
+                case "Cooking": return 50;
+                case "Ready": return 80;
+                case "Completed": return 100;
+                default: return 0;
             }
-            for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
-                const ac = ord.alacarte.find(a=>a.menuId===mi.id);
-                document.getElementById(`ac_${mi.id}_qty`).value = ac ? ac.qty : 0;
-                document.getElementById(`ac_${mi.id}_qty_display`).innerText = ac ? ac.qty : 0;
-            }
-        };
-
-        window.cancelOrder = function(orderId) {
-            if (editOrderMode && editOrderId === orderId) {
-                hideEditModeBar();
-                showNotification('Edit cancelled, no changes applied.', 2000, 'success');
-                return;
-            }
-            const ord = orders.find(o => o.id === orderId);
-            if (!ord) return showNotification('Order not found!', 2500, 'error');
-            if (ord.status !== "Pending") return showNotification('Order hanya bisa dibatalkan saat status Pending!', 2500, 'error');
-            db.collection('orders').doc(orderId).delete();
-            showNotification('Order dibatalkan!', 2000, 'success');
-        };
-
-        function handleFloatingBtnVisibility() {
-            var btn = document.getElementById('floating-send-to-kitchen-btn');
-            var adminSectionActive = document.getElementById('admin-section').classList.contains('active');
-            if (adminSectionActive && !editOrderMode) {
-                btn.classList.remove('hide');
-            } else {
-                btn.classList.add('hide');
-            }
-        }
-
-        // --- Modal Functions ---
-        function showOrderSummaryModal() {
-            const customer = document.getElementById('customer-name').value.trim();
-            const deliveryTimeInput = document.getElementById('delivery-time').value;
-            const deliveryLocation = document.getElementById('delivery-location').value.trim();
-            const notes = document.getElementById('order-notes').value.trim();
-            const now = dayjs().tz(DEFAULT_TZ);
-            const deliveryTime = dayjs.tz(`${now.format('YYYY-MM-DD')}T${deliveryTimeInput}`, DEFAULT_TZ).utc().toISOString();
-            const packages = [];
-            for (const mi of menuItems.filter(m=>m.type==='package')) {
-                const qty = Number(document.getElementById(`pkg_${mi.id}_qty`).value);
-                if (qty > 0) packages.push({menuId: mi.id, qty});
-            }
-            const alacarte = [];
-            for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
-                const qty = Number(document.getElementById(`ac_${mi.id}_qty`).value);
-                if (qty > 0) alacarte.push({menuId: mi.id, qty});
-            }
-            if (!customer || !deliveryTimeInput || !deliveryLocation || (!packages.length && !alacarte.length)) {
-                showNotification('Please fill all required fields and select items.', 2500, 'error');
-                return;
-            }
-            let html = `<b>Customer:</b> ${customer}<br>`;
-            html += `<b>Delivery Location:</b> ${deliveryLocation}<br>`;
-            html += `<b>Delivery Time:</b> ${dayjs(deliveryTime).tz(DEFAULT_TZ).format('YYYY-MM-DD HH:mm')}<br>`;
-            document.getElementById('modal-summary-details').innerHTML = html;
-            let itemList = '';
-            if (packages.length > 0) {
-                itemList += `<li><b>Packages:</b><ul>`;
-                for (const pkg of packages) {
-                    const mi = menuItems.find(m => m.id === pkg.menuId);
-                    if (mi) {
-                        itemList += `<li><b>${mi.name}</b> x${pkg.qty} (¥${mi.price * pkg.qty})`;
-                        if (menuDetails[mi.name]) {
-                            itemList += `<ul>${menuDetails[mi.name].map(i=>`<li>${i}</li>`).join('')}</ul>`;
-                        }
-                        itemList += `</li>`;
-                    }
-                }
-                itemList += `</ul></li>`;
-            }
-            if (alacarte.length > 0) {
-                itemList += `<li><b>Ala Carte:</b><ul>`;
-                for (const ac of alacarte) {
-                    const mi = menuItems.find(m => m.id === ac.menuId);
-                    if (mi) {
-                        itemList += `<li>${mi.name} x${ac.qty} (¥${mi.price * ac.qty})</li>`;
-                    }
-                }
-                itemList += `</ul></li>`;
-            }
-            if (notes) {
-                itemList += `<li><b>Notes:</b> ${notes}</li>`;
-            }
-            document.getElementById('modal-summary-items').innerHTML = itemList;
-            document.getElementById('modal-summary-total').innerHTML = `<span>Total Pembayaran: <b>¥${calcOrderTotal({packages,alacarte})}</b></span>`;
-            document.getElementById('order-summary-modal').style.display = 'flex';
-
-            window.__orderSummaryTemp = {customer,deliveryTime,deliveryLocation,notes,packages,alacarte};
-        }
-
-        // --- Kitchen Action Functions ---
-        window.handleKitchenAction = async function(orderId, newStatus, btn) {
-            btn.classList.add('pop');
-            setTimeout(()=>btn.classList.remove('pop'), 370);
-            const ord = orders.find(o => o.id === orderId);
-            if (!ord) return;
-            let updateObj = { status: newStatus };
-            updateObj[`${newStatus.toLowerCase()}At`] = firebase.firestore.FieldValue.serverTimestamp();
-            if (newStatus === 'Completed') {
-                updateObj.completedAt = firebase.firestore.FieldValue.serverTimestamp();
-                generateInvoice(orderId);
-                sendTelegram(orderId);
-            }
-            await db.collection('orders').doc(orderId).update(updateObj);
-            showNotification(`Order ${orderId} status updated to ${newStatus}`, 2000, 'success');
-            if (newStatus === "Ready") {
-                sendTelegram(orderId);
-            }
-        };
-
-        // --- Report Functions (LANJUTAN) ---
-        function getReportFilteredOrders() {
-            let start = document.getElementById('report-start').value;
-            let end = document.getElementById('report-end').value;
-            let type = document.getElementById('report-type').value;
-            let status = document.getElementById('report-status').value;
-            let orderId = document.getElementById('report-id').value.trim();
-            let customer = document.getElementById('report-customer').value.trim().toLowerCase();
-            let filtered = orders.filter(ord => {
-                let t = ord.createdAt && ord.createdAt.seconds ? dayjs.unix(ord.createdAt.seconds).tz(DEFAULT_TZ).toDate() : new Date(ord.createdAt);
-                let s = start ? new Date(start) : null;
-                let e = end ? new Date(end) : null;
-                if (status && ord.status !== status) return false;
-                if (orderId && !ord.id.includes(orderId)) return false;
-                if (customer && (!ord.customer || !ord.customer.toLowerCase().includes(customer))) return false;
-                return (!s || t >= s) && (!e || t <= e);
-            });
-            return filtered;
-        }
-
-        // --- Invoice Functions ---
-        function generateInvoice(orderId) {
-            const ord = orders.find(o => o.id === orderId);
-            if (!ord) return;
-            const total = calcOrderTotal(ord);
-            const invoiceId = `INV_${orderId}`;
-            const invoice = {
-                invoiceId,
-                orderId,
-                customer: ord.customer,
-                totalPrice: total,
-                completedTime: ord.completedAt || new Date(),
-                details: {
-                    packages: ord.packages,
-                    alacarte: ord.alacarte
-                }
-            };
-            db.collection('invoices').doc(invoiceId).set(invoice);
-            invoices.unshift(invoice);
-            renderInvoicesTable();
         }
 
         function renderInvoicesTable() {
-            const tb = document.getElementById('invoices-table').getElementsByTagName('tbody')[0];
+            const table = document.getElementById('invoices-table');
+            if (!table || !invoices) return;
+            
+            const tb = table.getElementsByTagName('tbody')[0];
             if (!tb) return;
+            
             tb.innerHTML = '';
             for (const inv of invoices) {
                 tb.innerHTML += `<tr>
@@ -1867,12 +1656,159 @@
             }
         }
 
+        // Edit Order Functions
+        function handleFloatingBtnVisibility() {
+            const btn = document.getElementById('floating-send-to-kitchen-btn');
+            const adminSectionActive = document.getElementById('admin-section').classList.contains('active');
+            if (adminSectionActive && !editOrderMode) {
+                btn.classList.remove('hide');
+            } else {
+                btn.classList.add('hide');
+            }
+        }
+
+        window.editOrder = function(orderId) {
+            showNotification('Edit order feature will be implemented', 2000, 'info');
+        };
+
+        window.cancelOrder = function(orderId) {
+            if (confirm('Are you sure you want to cancel this order?')) {
+                db.collection('orders').doc(orderId).delete();
+                showNotification('Order cancelled!', 2000, 'success');
+            }
+        };
+
+        // Kitchen Action Functions
+        window.handleKitchenAction = async function(orderId, newStatus, btn) {
+            btn.classList.add('pop');
+            setTimeout(()=>btn.classList.remove('pop'), 370);
+            
+            let updateObj = { status: newStatus };
+            updateObj[`${newStatus.toLowerCase()}At`] = firebase.firestore.FieldValue.serverTimestamp();
+            
+            if (newStatus === 'Completed') {
+                updateObj.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+                generateInvoice(orderId);
+            }
+            
+            await db.collection('orders').doc(orderId).update(updateObj);
+            showNotification(`Order ${orderId} status updated to ${newStatus}`, 2000, 'success');
+        };
+
+        // Modal Functions
+        function showOrderSummaryModal() {
+            const customer = document.getElementById('customer-name').value.trim();
+            const deliveryTimeInput = document.getElementById('delivery-time').value;
+            const deliveryLocation = document.getElementById('delivery-location').value.trim();
+            const notes = document.getElementById('order-notes').value.trim();
+            
+            if (!customer || !deliveryTimeInput || !deliveryLocation) {
+                showNotification('Please fill all required fields.', 2500, 'error');
+                return;
+            }
+            
+            const now = dayjs().tz(DEFAULT_TZ);
+            const deliveryTime = dayjs.tz(`${now.format('YYYY-MM-DD')}T${deliveryTimeInput}`, DEFAULT_TZ).utc().toISOString();
+            
+            const packages = [];
+            const alacarte = [];
+            
+            for (const mi of menuItems.filter(m => m.type === 'package')) {
+                const qtyElement = document.getElementById(`pkg_${mi.id}_qty`);
+                if (qtyElement) {
+                    const qty = Number(qtyElement.value);
+                    if (qty > 0) packages.push({menuId: mi.id, qty});
+                }
+            }
+            
+            for (const mi of menuItems.filter(m => m.type === 'alacarte')) {
+                const qtyElement = document.getElementById(`ac_${mi.id}_qty`);
+                if (qtyElement) {
+                    const qty = Number(qtyElement.value);
+                    if (qty > 0) alacarte.push({menuId: mi.id, qty});
+                }
+            }
+            
+            if (!packages.length && !alacarte.length) {
+                showNotification('Please select at least one item.', 2500, 'error');
+                return;
+            }
+            
+            let html = `<b>Customer:</b> ${customer}<br>`;
+            html += `<b>Delivery Location:</b> ${deliveryLocation}<br>`;
+            html += `<b>Delivery Time:</b> ${dayjs(deliveryTime).tz(DEFAULT_TZ).format('YYYY-MM-DD HH:mm')}<br>`;
+            document.getElementById('modal-summary-details').innerHTML = html;
+            
+            let itemList = '';
+            if (packages.length > 0) {
+                itemList += `<li><b>Packages:</b><ul>`;
+                for (const pkg of packages) {
+                    const mi = menuItems.find(m => m.id === pkg.menuId);
+                    if (mi) {
+                        itemList += `<li><b>${mi.name}</b> x${pkg.qty} (¥${mi.price * pkg.qty})`;
+                        if (menuDetails[mi.name]) {
+                            itemList += `<ul>${menuDetails[mi.name].map(i=>`<li>${i}</li>`).join('')}</ul>`;
+                        }
+                        itemList += `</li>`;
+                    }
+                }
+                itemList += `</ul></li>`;
+            }
+            
+            if (alacarte.length > 0) {
+                itemList += `<li><b>Ala Carte:</b><ul>`;
+                for (const ac of alacarte) {
+                    const mi = menuItems.find(m => m.id === ac.menuId);
+                    if (mi) {
+                        itemList += `<li>${mi.name} x${ac.qty} (¥${mi.price * ac.qty})</li>`;
+                    }
+                }
+                itemList += `</ul></li>`;
+            }
+            
+            if (notes) {
+                itemList += `<li><b>Notes:</b> ${notes}</li>`;
+            }
+            
+            document.getElementById('modal-summary-items').innerHTML = itemList;
+            document.getElementById('modal-summary-total').innerHTML = `<span>Total Pembayaran: <b>¥${calcOrderTotal({packages,alacarte})}</b></span>`;
+            document.getElementById('order-summary-modal').style.display = 'flex';
+
+            window.__orderSummaryTemp = {customer,deliveryTime,deliveryLocation,notes,packages,alacarte};
+        }
+
+        // Invoice Functions
+        function generateInvoice(orderId) {
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return;
+            
+            const total = calcOrderTotal(ord);
+            const invoiceId = `INV_${orderId}`;
+            const invoice = {
+                invoiceId,
+                orderId,
+                customer: ord.customer,
+                totalPrice: total,
+                completedTime: new Date(),
+                details: {
+                    packages: ord.packages,
+                    alacarte: ord.alacarte
+                }
+            };
+            
+            db.collection('invoices').doc(invoiceId).set(invoice);
+            invoices.unshift(invoice);
+            renderInvoicesTable();
+        }
+
         window.downloadInvoicePdf = function(orderId) {
             const ord = orders.find(o => o.id === orderId);
             if (!ord) return showNotification('Order not found!', 2500, 'error');
+            
             const total = calcOrderTotal(ord);
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            
             doc.setFont('helvetica','bold');
             doc.setFontSize(18);
             doc.text('CRI Catering Invoice', 20, 20);
@@ -1884,8 +1820,9 @@
             doc.text(`Delivery Time: ${formatDateTime(ord.deliveryTime)}`, 20, 54);
             doc.text(`Completed: ${formatDateTime(ord.completedAt)}`, 20, 62);
             doc.text('Order Details:', 20, 70);
+            
             let y = 78;
-            for (const pkg of ord.packages) {
+            for (const pkg of ord.packages || []) {
                 const mi = menuItems.find(m => m.id === pkg.menuId);
                 if (mi) {
                     doc.setFont('helvetica','bold');
@@ -1900,7 +1837,8 @@
                     }
                 }
             }
-            for (const ac of ord.alacarte) {
+            
+            for (const ac of ord.alacarte || []) {
                 const mi = menuItems.find(m => m.id === ac.menuId);
                 if (mi) {
                     doc.setFont('helvetica','bold');
@@ -1908,138 +1846,103 @@
                     y += 8;
                 }
             }
+            
             doc.setFont('helvetica','bold');
             doc.text(`Total Price: ¥${total}`, 20, y+5);
             doc.save(`invoice_${orderId}.pdf`);
             showNotification('Invoice downloaded!', 2000, 'success');
         };
 
-        // --- Telegram Functions ---
-        function sendTelegram(orderId) {
-            if (telegramSentIds.has(orderId)) return;
-            const ord = orders.find(o => o.id === orderId);
-            if (!ord) return;
-            let msg = '👋🏻 Siap Diantar 👋🏻\n\n';
-            msg += `Orderan #${ord.id}\n\n`;
-            msg += `Nama Customer: ${ord.customer}\nLocation: ${ord.deliveryLocation}\nDelivery Time: ${formatDateTime(ord.deliveryTime)}\n\n`;
-            msg += `Order:\n`;
-            for (const pkg of ord.packages) {
-                const mi = menuItems.find(m => m.id === pkg.menuId);
-                if (mi) {
-                    msg += `- ${mi.name} x${pkg.qty}\n`;
-                    if (menuDetails[mi.name]) {
-                        for (const detail of menuDetails[mi.name]) {
-                            msg += `   • ${detail}\n`;
-                        }
-                    }
-                }
-            }
-            for (const ac of ord.alacarte) {
-                const mi = menuItems.find(m => m.id === ac.menuId);
-                if (mi) {
-                    msg += `- ${mi.name} x${ac.qty}\n`;
-                }
-            }
-            msg += `Notes: ${ord.notes || '-'}\n\n`;
-            msg += `Total: ¥${calcOrderTotal(ord)}\n`;
-            const botToken = "7977280306:AAFG8qAVnSD81p73iFP3wRceOP-605auqQ0";
-            const chatId = "-1002880911209";
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `chat_id=${encodeURIComponent(chatId)}&text=${encodeURIComponent(msg)}`
-            }).then(r=>r.json()).then(data=>{
-                if (data.ok) {
-                    telegramSentIds.add(orderId);
-                    showNotification('Pesan Telegram sukses!', 2000, 'success');
-                } else {
-                    showNotification('Gagal kirim Telegram: ' + JSON.stringify(data), 3500, 'error');
-                }
-            }).catch(e=>{
-                showNotification('Gagal kirim Telegram: ' + e.message, 3500, 'error');
-            });
-        }
-
-        // --- Event Listeners Setup ---
+        // Event Listeners Setup
         function setupEventListeners() {
-            // Sidebar toggle
+            // Sidebar navigation
             sidebarToggleBtn.addEventListener('click', toggleSidebar);
             sidebarOverlay.addEventListener('click', closeSidebar);
 
-            // Close sidebar on navigation (mobile)
-            document.querySelectorAll('.sidebar-link').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (window.innerWidth <= 600) {
-                        closeSidebar();
-                    }
-                });
-            });
-
-            // Navigation links
-            document.getElementById('nav-admin').onclick = function() {
+            // Navigation links - Fixed event listeners
+            document.getElementById('nav-admin').addEventListener('click', function() {
+                console.log('Admin nav clicked');
                 setSidebarActive('nav-admin');
                 showSection('admin-section');
-            };
-            document.getElementById('nav-kitchen').onclick = function() {
+                if (window.innerWidth <= 600) closeSidebar();
+            });
+
+            document.getElementById('nav-kitchen').addEventListener('click', function() {
+                console.log('Kitchen nav clicked');
                 setSidebarActive('nav-kitchen');
                 showSection('kitchen-section');
-            };
-            document.getElementById('nav-reports').onclick = function() {
+                if (window.innerWidth <= 600) closeSidebar();
+            });
+
+            document.getElementById('nav-reports').addEventListener('click', function() {
+                console.log('Reports nav clicked');
                 setSidebarActive('nav-reports');
                 showSection('reports-section');
-            };
-            document.getElementById('nav-menu').onclick = function() {
+                if (window.innerWidth <= 600) closeSidebar();
+            });
+
+            document.getElementById('nav-menu').addEventListener('click', function() {
+                console.log('Menu nav clicked');
                 setSidebarActive('nav-menu');
                 showSection('menu-section');
-            };
+                if (window.innerWidth <= 600) closeSidebar();
+            });
 
             // Form submissions
-            document.getElementById('order-form').onsubmit = function(e) {
+            document.getElementById('order-form').addEventListener('submit', function(e) {
                 e.preventDefault();
-                if (editOrderMode) return;
                 showOrderSummaryModal();
-            };
+            });
 
-            document.getElementById('menu-form').onsubmit = async function(e) {
+            document.getElementById('menu-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const type = document.getElementById('menu-type').value;
                 const name = document.getElementById('menu-name').value.trim();
                 const desc = document.getElementById('menu-desc').value.trim();
                 const price = Number(document.getElementById('menu-price').value);
-                if (!name || isNaN(price) || price <= 0) return showNotification('Invalid menu item!', 2500, 'error');
-                const id = `${type}_${name.replace(/\s+/g,'_').toLowerCase()}_${Math.floor(Math.random()*100000)}`;
+                
+                if (!name || isNaN(price) || price <= 0) {
+                    return showNotification('Invalid menu item!', 2500, 'error');
+                }
+                
+                const id = `${type}_${name.replace(/\s+/g,'_').toLowerCase()}_${Date.now()}`;
                 await db.collection('menu').doc(id).set({id, type, name, desc, price});
                 showNotification('Menu item added!', 2000, 'success');
                 document.getElementById('menu-form').reset();
-            };
+            });
 
-            document.getElementById('menu-edit-form').onsubmit = async function(e) {
+            document.getElementById('menu-edit-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!menuEditId) return showNotification('No menu selected!', 2500, 'error');
+                
                 const type = document.getElementById('edit-menu-type').value;
                 const name = document.getElementById('edit-menu-name').value.trim();
                 const desc = document.getElementById('edit-menu-desc').value.trim();
                 const price = Number(document.getElementById('edit-menu-price').value);
-                if (!name || isNaN(price) || price <= 0) return showNotification('Invalid menu item!', 2500, 'error');
+                
+                if (!name || isNaN(price) || price <= 0) {
+                    return showNotification('Invalid menu item!', 2500, 'error');
+                }
+                
                 await db.collection('menu').doc(menuEditId).update({type, name, desc, price});
                 showNotification('Menu item edited!', 2000, 'success');
                 document.getElementById('menu-edit-modal').style.display = 'none';
                 menuEditId = null;
-            };
+            });
 
             // Button clicks
-            document.getElementById('floating-send-to-kitchen-btn').onclick = function() {
-                if (editOrderMode) return;
+            document.getElementById('floating-send-to-kitchen-btn').addEventListener('click', function() {
                 showOrderSummaryModal();
-            };
+            });
 
-            document.getElementById('modal-edit-btn').onclick = function() {
+            document.getElementById('modal-edit-btn').addEventListener('click', function() {
                 document.getElementById('order-summary-modal').style.display = 'none';
-            };
+            });
 
-            document.getElementById('modal-send-btn').onclick = async function() {
+            document.getElementById('modal-send-btn').addEventListener('click', async function() {
                 const temp = window.__orderSummaryTemp;
                 if (!temp) return;
+                
                 const oid = `ORD_${Date.now().toString().slice(-8)}`;
                 const order = {
                     id: oid,
@@ -2050,157 +1953,25 @@
                     packages: temp.packages,
                     alacarte: temp.alacarte,
                     status: 'Pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    kitchenNotes: []
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
+                
                 await db.collection('orders').doc(oid).set(order);
                 showNotification('Order sent to kitchen!', 2000, 'success');
                 document.getElementById('order-form').reset();
                 setDefaultDeliveryTime();
                 renderMenus();
                 document.getElementById('order-summary-modal').style.display = 'none';
-            };
+            });
 
-            document.getElementById('order-summary-modal').onclick = function(e) {
+            document.getElementById('order-summary-modal').addEventListener('click', function(e) {
                 if (e.target === this) this.style.display = 'none';
-            };
+            });
 
-            document.getElementById('menu-edit-cancel-btn').onclick = function() {
+            document.getElementById('menu-edit-cancel-btn').addEventListener('click', function() {
                 document.getElementById('menu-edit-modal').style.display = 'none';
                 menuEditId = null;
-            };
-
-            document.getElementById('edit-order-save-btn').onclick = async function() {
-                if (!editOrderMode || !editOrderId) return;
-                const customer = document.getElementById('customer-name').value.trim();
-                const deliveryTimeInput = document.getElementById('delivery-time').value;
-                const deliveryLocation = document.getElementById('delivery-location').value.trim();
-                const notes = document.getElementById('order-notes').value.trim();
-                const packages = [];
-                for (const mi of menuItems.filter(m=>m.type==='package')) {
-                    const qty = Number(document.getElementById(`pkg_${mi.id}_qty`).value);
-                    if (qty > 0) packages.push({menuId: mi.id, qty});
-                }
-                const alacarte = [];
-                for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
-                    const qty = Number(document.getElementById(`ac_${mi.id}_qty`).value);
-                    if (qty > 0) alacarte.push({menuId: mi.id, qty});
-                }
-                if (!customer || !deliveryTimeInput || !deliveryLocation || (!packages.length && !alacarte.length)) {
-                    showNotification('Please fill all required fields and select items.', 2500, 'error');
-                    return;
-                }
-                const now = dayjs().tz(DEFAULT_TZ);
-                const deliveryTime = dayjs.tz(`${now.format('YYYY-MM-DD')}T${deliveryTimeInput}`, DEFAULT_TZ).utc().toISOString();
-                const order = {
-                    id: editOrderId,
-                    customer,
-                    deliveryTime: deliveryTime,
-                    deliveryLocation,
-                    notes,
-                    packages,
-                    alacarte,
-                    status: 'Pending',
-                    createdAt: previousOrderData.createdAt,
-                    kitchenNotes: previousOrderData.kitchenNotes || []
-                };
-                await db.collection('orders').doc(editOrderId).set(order);
-                showNotification('Order edited successfully!', 2000, 'success');
-                hideEditModeBar();
-            };
-
-            document.getElementById('edit-order-cancel-btn').onclick = function() {
-                hideEditModeBar();
-                showNotification('Edit cancelled, no changes applied.', 2000, 'success');
-            };
-
-            // Export buttons
-            document.getElementById('export-excel-btn').onclick = function() {
-                let start = document.getElementById('report-start').value;
-                let end = document.getElementById('report-end').value;
-                let type = document.getElementById('report-type').value;
-                let cols = Array.from(document.getElementById('report-cols').selectedOptions).map(o=>o.value);
-                let filtered = getReportFilteredOrders();
-                let data = filtered.map(ord => {
-                    let row = {};
-                    if (cols.includes("Order ID")) row["Order ID"] = ord.id;
-                    if (cols.includes("Date")) row["Date"] = formatDateTime(ord.createdAt);
-                    if (cols.includes("Customer")) row["Customer"] = ord.customer;
-                    if (cols.includes("Order Details")) {
-                        row["Order Details"] = "Package: " + (ord.packages||[]).map(p => {
-                            const mi = menuItems.find(m => m.id === p.menuId);
-                            return mi ? `${mi.name} x${p.qty}` : '';
-                        }).join(', ') +
-                        "; Ala Carte: " + (ord.alacarte||[]).map(a => {
-                            const mi = menuItems.find(m => m.id === a.menuId);
-                            return mi ? `${mi.name} x${a.qty}` : '';
-                        }).join(', ');
-                    }
-                    if (cols.includes("Status")) row["Status"] = ord.status;
-                    if (cols.includes("Delivery Time")) row["Delivery Time"] = formatDateTime(ord.deliveryTime);
-                    if (cols.includes("Timestamp Pending")) row["Timestamp Pending"] = formatDateTime(ord.createdAt);
-                    if (cols.includes("Timestamp Cooking")) row["Timestamp Cooking"] = formatDateTime(ord.cookingAt);
-                    if (cols.includes("Timestamp Ready")) row["Timestamp Ready"] = formatDateTime(ord.readyAt);
-                    if (cols.includes("Timestamp Completed")) row["Timestamp Completed"] = formatDateTime(ord.completedAt);
-                    return row;
-                });
-                let ws = XLSX.utils.json_to_sheet(data);
-                let wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Orders");
-                let filename = autoFileNameReport(type, start, end, 'xlsx');
-                XLSX.writeFile(wb, filename);
-                showNotification('Excel report exported!', 2000, 'success');
-            };
-
-            document.getElementById('export-pdf-btn').onclick = function() {
-                let start = document.getElementById('report-start').value;
-                let end = document.getElementById('report-end').value;
-                let type = document.getElementById('report-type').value;
-                let cols = Array.from(document.getElementById('report-cols').selectedOptions).map(o=>o.value);
-                let filtered = getReportFilteredOrders();
-                const doc = new window.jspdf.jsPDF();
-                doc.setFont('helvetica','bold');
-                doc.setFontSize(16);
-                doc.text('CRI Catering Report', 20, 20);
-                doc.setFontSize(10);
-                let y = 28;
-                doc.text(`Type: ${type}, Range: ${start||'-'} to ${end||'-'}`, 20, y); y+=8;
-                doc.setFont('helvetica','normal');
-                let idx = 1;
-                for(const ord of filtered){
-                    let line = `${idx++}. `;
-                    if (cols.includes("Order ID")) line += `Order ID: ${ord.id} | `;
-                    if (cols.includes("Date")) line += `Date: ${formatDateTime(ord.createdAt)} | `;
-                    if (cols.includes("Customer")) line += `Customer: ${ord.customer} | `;
-                    if (cols.includes("Status")) line += `Status: ${ord.status} | `;
-                    if (cols.includes("Delivery Time")) line += `Delivery: ${formatDateTime(ord.deliveryTime)} | `;
-                    doc.text(line, 20, y);
-                    y+=7;
-                    if (cols.includes("Order Details")) {
-                        doc.text(`    Package: ${(ord.packages||[]).map(p => {
-                            const mi = menuItems.find(m => m.id === p.menuId);
-                            return mi ? `${mi.name} x${p.qty}` : '';
-                        }).join(', ')}`, 20, y);
-                        y+=6;
-                        doc.text(`    Ala Carte: ${(ord.alacarte||[]).map(a => {
-                            const mi = menuItems.find(m => m.id === a.menuId);
-                            return mi ? `${mi.name} x${a.qty}` : '';
-                        }).join(', ')}`, 20, y);
-                        y+=8;
-                    }
-                    if (cols.includes("Timestamp Pending")) { doc.text(`    Pending: ${formatDateTime(ord.createdAt)}`, 20, y); y+=6; }
-                    if (cols.includes("Timestamp Cooking")) { doc.text(`    Cooking: ${formatDateTime(ord.cookingAt)}`, 20, y); y+=6; }
-                    if (cols.includes("Timestamp Ready")) { doc.text(`    Ready: ${formatDateTime(ord.readyAt)}`, 20, y); y+=6; }
-                    if (cols.includes("Timestamp Completed")) { doc.text(`    Completed: ${formatDateTime(ord.completedAt)}`, 20, y); y+=6; }
-                    if(y>270) {
-                        doc.addPage();
-                        y=20;
-                    }
-                }
-                let filename = autoFileNameReport(type, start, end, 'pdf');
-                doc.save(filename);
-                showNotification('PDF report exported!', 2000, 'success');
-            };
+            });
 
             // Responsive handling
             window.addEventListener('resize', () => {
@@ -2214,52 +1985,10 @@
                     sidebarOverlay.classList.add('hide');
                     document.body.classList.remove('menu-active');
                 }
-                adjustTouchTargets();
             });
         }
 
-        function adjustTouchTargets() {
-            if (window.innerWidth <= 700) {
-                document.querySelectorAll('.btn,.action-btn,.pagination-btn').forEach(btn => {
-                    btn.style.fontSize = '1.05rem';
-                    btn.style.padding = '0.8rem 1.1rem';
-                });
-                document.querySelectorAll('input,select,textarea').forEach(el => {
-                    el.style.fontSize = '1.07rem';
-                    el.style.padding = '0.9rem';
-                });
-            }
-        }
-
-        // --- Tooltip Support for Mobile ---
-        function setupMobileTooltips() {
-            document.querySelectorAll('.sidebar-link').forEach(btn => {
-                btn.addEventListener('touchstart', function() {
-                    if (btn.dataset.tooltip) {
-                        let tip = document.createElement('div');
-                        tip.textContent = btn.dataset.tooltip;
-                        tip.style.position = 'absolute';
-                        tip.style.left = '100%';
-                        tip.style.top = '50%';
-                        tip.style.transform = 'translateY(-50%)';
-                        tip.style.background = '#312015';
-                        tip.style.color = '#fff';
-                        tip.style.padding = '0.4em 0.8em';
-                        tip.style.borderRadius = '8px';
-                        tip.style.fontSize = '0.95rem';
-                        tip.style.marginLeft = '15px';
-                        tip.style.whiteSpace = 'nowrap';
-                        tip.style.zIndex = '2000';
-                        tip.style.boxShadow = '0 2px 12px rgba(60,20,20,0.22)';
-                        tip.className = 'sidebar-tooltip';
-                        btn.appendChild(tip);
-                        setTimeout(()=>{ if (tip && tip.parentNode) tip.parentNode.removeChild(tip); }, 1800);
-                    }
-                });
-            });
-        }
-
-        // --- Firebase Real-time Listeners ---
+        // Firebase Listeners Setup
         function setupFirebaseListeners() {
             // Initialize default menu details
             menuDetails = {
@@ -2278,8 +2007,8 @@
             db.collection('orders').onSnapshot(snap => {
                 orders = snap.docs.map(doc => doc.data());
                 console.log('Orders loaded:', orders.length);
-                renderAdminOrders(adminOrdersPage);
-                renderKitchenOrders(kitchenOrdersPage);
+                renderAdminOrders();
+                renderKitchenOrders();
             });
 
             db.collection('invoices').onSnapshot(snap => {
@@ -2289,15 +2018,12 @@
             });
         }
 
-        // --- Initialize Application ---
+        // Initialize Application
         function initializeApp() {
             console.log('Initializing CRI Catering Dashboard...');
             
             // Setup event listeners
             setupEventListeners();
-            
-            // Setup mobile tooltips
-            setupMobileTooltips();
             
             // Setup Firebase listeners
             setupFirebaseListeners();
@@ -2313,25 +2039,22 @@
                 sidebarOpen = false;
             }
             
-            // Adjust touch targets
-            adjustTouchTargets();
-            
             // Handle floating button visibility
             handleFloatingBtnVisibility();
             
             console.log('Dashboard initialized successfully!');
         }
 
-        // --- DOMContentLoaded Event ---
+        // Make functions globally available
+        window.toggleMenuPanel = toggleMenuPanel;
+        window.renderAdminOrders = renderAdminOrders;
+        window.renderKitchenOrders = renderKitchenOrders;
+
+        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, starting initialization...');
             initializeApp();
         });
-
-        // Make functions available globally for onclick handlers
-        window.renderAdminOrders = renderAdminOrders;
-        window.renderKitchenOrders = renderKitchenOrders;
-        window.toggleMenuPanel = toggleMenuPanel;
 
     </script>
 </body>
