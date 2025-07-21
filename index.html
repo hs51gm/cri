@@ -178,7 +178,7 @@
             border-radius: 50%;
             width: 44px;
             height: 44px;
-            z-index: 1300;
+            z-index: 1400;
             cursor: pointer;
             box-shadow: 0 2px 12px rgba(60,20,20,0.16);
             font-size: 1.7rem;
@@ -188,17 +188,61 @@
         .sidebar-toggle-btn:active {
             background: var(--primary);
         }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            left: 0; top: 0; right: 0; bottom: 0;
+            z-index: 1100;
+            background: rgba(60,20,20,0.12);
+        }
+        .sidebar-overlay.show {
+            display: block;
+        }
         @media (max-width: 900px) {
             .sidebar { width: 172px; }
         }
         @media (max-width: 600px) {
-            .sidebar { width: 210px; height: 100vh; min-height: unset; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 1200; border-right: 1.5px solid var(--sidebar-border); border-bottom: none; box-shadow: 1px 0 12px rgba(60,20,20,0.07); transition: transform 0.35s cubic-bezier(.44,.88,.49,1.09);}
-            .sidebar.collapsed { transform: translateX(-100%); left: -210px;}
+            .sidebar { 
+                width: 210px; 
+                height: 100vh; 
+                min-height: unset; 
+                flex-direction: column; 
+                position: fixed; 
+                top: 0; 
+                left: 0; 
+                bottom: 0; 
+                z-index: 1350; 
+                border-right: 1.5px solid var(--sidebar-border); 
+                border-bottom: none; 
+                box-shadow: 1px 0 12px rgba(60,20,20,0.07);
+                transition: transform 0.35s cubic-bezier(.44,.88,.49,1.09);
+            }
+            .sidebar.collapsed { 
+                transform: translateX(-100%); 
+                left: 0;
+            }
             .sidebar-logo { display: none; }
             .sidebar-nav { flex-direction: column; gap: 0.3rem; }
             .sidebar-link { border-radius: var(--radius); padding: 0.76rem 0.37rem; font-size: 1.05rem; border-left: none; }
             .sidebar-footer { display: none; }
-            .sidebar-toggle-btn { display: flex; }
+            .sidebar-toggle-btn { display: flex; z-index: 1400; }
+            .sidebar-overlay {
+                display: block;
+                position: fixed;
+                left: 0; top: 0; right: 0; bottom: 0;
+                z-index: 1300;
+                background: rgba(60,20,20,0.22);
+                opacity: 1;
+                transition: opacity 0.35s cubic-bezier(.44,.88,.49,1.09);
+            }
+            .sidebar-overlay.hide {
+                display: none;
+                opacity: 0;
+            }
+            body.menu-active main {
+                pointer-events: none;
+                filter: blur(2px) brightness(0.98);
+            }
         }
         main {
             flex: 1;
@@ -842,22 +886,11 @@
             font-size: 1.08rem;
             color: var(--primary-dark);
         }
-        /* Hamburger Overlay */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            left: 0; top: 0; right: 0; bottom: 0;
-            z-index: 1100;
-            background: rgba(60,20,20,0.12);
-        }
-        .sidebar-overlay.show {
-            display: block;
-        }
     </style>
 </head>
 <body>
     <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="Menu"><i class="fas fa-bars"></i></button>
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="sidebar-overlay hide" id="sidebar-overlay"></div>
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-logo">CRI Catering</div>
         <div class="sidebar-nav">
@@ -1201,16 +1234,18 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
-        let sidebarOpen = window.innerWidth > 600;
+        let sidebarOpen = false;
 
         function openSidebar() {
             sidebar.classList.remove('collapsed');
-            sidebarOverlay.classList.add('show');
+            sidebarOverlay.classList.remove('hide');
+            document.body.classList.add('menu-active');
             sidebarOpen = true;
         }
         function closeSidebar() {
             sidebar.classList.add('collapsed');
-            sidebarOverlay.classList.remove('show');
+            sidebarOverlay.classList.add('hide');
+            document.body.classList.remove('menu-active');
             sidebarOpen = false;
         }
         function toggleSidebar() {
@@ -1227,6 +1262,30 @@
                     closeSidebar();
                 }
             });
+        });
+
+        // Responsive: ensure sidebar overlay & blur match screen size
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 600) {
+                sidebar.classList.remove('collapsed');
+                sidebarOverlay.classList.add('hide');
+                document.body.classList.remove('menu-active');
+                sidebarOpen = false;
+            } else if (!sidebarOpen) {
+                sidebar.classList.add('collapsed');
+                sidebarOverlay.classList.add('hide');
+                document.body.classList.remove('menu-active');
+            }
+        });
+
+        // Initialize sidebar state on load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth <= 600) {
+                sidebar.classList.add('collapsed');
+                sidebarOverlay.classList.add('hide');
+                document.body.classList.remove('menu-active');
+                sidebarOpen = false;
+            }
         });
 
         // --- SIDEBAR Navigation ---
@@ -1377,7 +1436,7 @@
             }
             return total;
         }
-        function autoFileNameReport(type, start, end, format) {
+                function autoFileNameReport(type, start, end, format) {
             let s = start ? start.replaceAll('-', '_') : '';
             let e = end ? end.replaceAll('-', '_') : '';
             return `report_${type}_${s}_${e}.${format}`;
@@ -1888,8 +1947,8 @@
             updateObj[`${newStatus.toLowerCase()}At`] = firebase.firestore.FieldValue.serverTimestamp();
             if (newStatus === 'Completed') {
                 updateObj.completedAt = firebase.firestore.FieldValue.serverTimestamp();
-                generateInvoice(orderId);     // auto invoice
-                sendTelegram(orderId);        // tetap kirim Telegram!
+                generateInvoice(orderId);
+                sendTelegram(orderId);
             }
             await db.collection('orders').doc(orderId).update(updateObj);
             showNotification(`Order ${orderId} status updated to ${newStatus}`, 2000, 'success');
@@ -2183,7 +2242,6 @@
         });
 
         // --- Responsive Table/Grids Touch Support ---
-        // Make all buttons and fields a little bigger on mobile
         function adjustTouchTargets() {
             if (window.innerWidth <= 700) {
                 document.querySelectorAll('.btn,.action-btn,.pagination-btn').forEach(btn => {
