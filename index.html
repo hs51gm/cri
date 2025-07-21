@@ -1351,6 +1351,94 @@
 
         const DEFAULT_TZ = 'Asia/Bangkok';
         const PAGE_SIZE = 8;
+        
+        // Global Variables - Initialize First
+        let menuItems = [];
+        let orders = [];
+        let invoices = [];
+        let telegramSentIds = new Set();
+        let menuEditId = null;
+        
+        // Menu Details Data dengan menu terbaru
+        let menuDetails = {
+            "PAYALUR BAKWAN": [
+                "Nasi Putih dan Ayam Goreng",
+                "Telur Balado",
+                "Bakwan Sayur",
+                "Sayur dan Sambal"
+            ],
+            "PAYALUR KENTANG": [
+                "Nasi Putih dan Ayam Goreng",
+                "Telur Balado", 
+                "Kentang Balado",
+                "Sayur dan Sambal"
+            ],
+            "PAYALIT BAKWAN": [
+                "Nasi Putih dan Ayam Goreng",
+                "Bakwan Sayur",
+                "Sayur dan Sambal"
+            ],
+            "PAYALIT TELUR": [
+                "Nasi Putih dan Ayam Goreng",
+                "Telur Balado",
+                "Sayur dan Sambal"
+            ],
+            "PAYAMAT": [
+                "Nasi Putih dan Ayam Goreng",
+                "Sayur dan Sambal"
+            ],
+            "PALUTANG": [
+                "Nasi Putih dan Telur Balado",
+                "Kentang Balado",
+                "Bakwan Sayur",
+                "Sayur"
+            ],
+            "PALUR": [
+                "Nasi Putih dan Telur Balado",
+                "Bakwan Sayur",
+                "Sayur"
+            ],
+            "PRAMES A": [
+                "Nasi Putih",
+                "Ayam Goreng",
+                "Tahu",
+                "Timun",
+                "Sambal",
+                "Kremesan"
+            ],
+            "PRAMES B": [
+                "Nasi Putih",
+                "Ayam Goreng",
+                "Telur Balado",
+                "Tahu",
+                "Timun",
+                "Sambal",
+                "Kremesan"
+            ],
+            "PRAMES C": [
+                "Nasi Putih",
+                "Ayam Goreng",
+                "Kentang Balado",
+                "Tahu",
+                "Timun",
+                "Sambal",
+                "Kremesan"
+            ],
+            "PRAMES KARBO": [
+                "Nasi Putih",
+                "Kentang Balado",
+                "Bakwan 2pcs",
+                "Sambal",
+                "Kremesan"
+            ],
+            "PRAMES VEGGIE": [
+                "Nasi Putih",
+                "Tahu",
+                "Timun",
+                "Sambal",
+                "Kremesan"
+            ]
+        };
 
         // --- Infinite Scroll ---
         let infiniteLoading = false;
@@ -2190,21 +2278,74 @@
             });
         }
 
-        db.collection('menu').onSnapshot(snap => {
-            menuItems = snap.docs.map(doc => doc.data());
+        // Initialize menu items with your actual menu
+        function initializeMenu() {
+            const initialMenuItems = [
+                // Package Items
+                {id: 'pkg_payalur_bakwan', type: 'package', name: 'PAYALUR BAKWAN', desc: '💴', price: 35},
+                {id: 'pkg_payalur_kentang', type: 'package', name: 'PAYALUR KENTANG', desc: '💴', price: 35},
+                {id: 'pkg_payalit_bakwan', type: 'package', name: 'PAYALIT BAKWAN', desc: '💴', price: 30},
+                {id: 'pkg_payalit_telur', type: 'package', name: 'PAYALIT TELUR', desc: '💴', price: 30},
+                {id: 'pkg_payamat', type: 'package', name: 'PAYAMAT', desc: '💴', price: 25},
+                {id: 'pkg_palutang', type: 'package', name: 'PALUTANG', desc: '💴', price: 25},
+                {id: 'pkg_palur', type: 'package', name: 'PALUR', desc: '💴', price: 20},
+                {id: 'pkg_prames_a', type: 'package', name: 'PRAMES A', desc: '💴', price: 25},
+                {id: 'pkg_prames_b', type: 'package', name: 'PRAMES B', desc: '💴', price: 33},
+                {id: 'pkg_prames_c', type: 'package', name: 'PRAMES C', desc: '💴', price: 30},
+                {id: 'pkg_prames_karbo', type: 'package', name: 'PRAMES KARBO', desc: '💴', price: 20},
+                {id: 'pkg_prames_veggie', type: 'package', name: 'PRAMES VEGGIE', desc: '💴', price: 15},
+                
+                // Ala Carte Items
+                {id: 'ac_ayam_goreng', type: 'alacarte', name: 'Ayam Goreng', desc: '▪️', price: 15},
+                {id: 'ac_telur_dadar', type: 'alacarte', name: 'Telur Dadar', desc: '▪️', price: 8},
+                {id: 'ac_kentang_balado', type: 'alacarte', name: 'Kentang Balado', desc: '▪️', price: 10},
+                {id: 'ac_telur_balado', type: 'alacarte', name: 'Telur Balado', desc: '▪️', price: 10},
+                {id: 'ac_telur_ceplok', type: 'alacarte', name: 'Telur Ceplok', desc: '▪️', price: 7},
+                {id: 'ac_bakwan_3pcs', type: 'alacarte', name: 'Bakwan 3pcs', desc: '▪️', price: 5},
+                {id: 'ac_extra_kremes', type: 'alacarte', name: 'Extra Kremes', desc: '▪️', price: 5},
+                {id: 'ac_extra_sayur', type: 'alacarte', name: 'Extra Sayur', desc: '▪️', price: 5},
+                {id: 'ac_extra_sambel', type: 'alacarte', name: 'Extra Sambel', desc: '▪️', price: 3}
+            ];
+        
+            // Add to Firebase if not exists
+            initialMenuItems.forEach(async (item) => {
+                try {
+                    await db.collection('menu').doc(item.id).set(item);
+                } catch (error) {
+                    console.log('Menu item already exists or error:', error);
+                }
+            });
+        
+            // Load immediately for display
+            menuItems = initialMenuItems;
             renderMenus();
             renderMenuTable();
-        });
-        db.collection('orders').onSnapshot(snap => {
-            orders = snap.docs.map(doc => doc.data());
-            renderAdminOrders(adminOrdersPage);
-            renderKitchenOrders(kitchenOrdersPage);
-        });
-        db.collection('invoices').onSnapshot(snap => {
-            invoices = snap.docs.map(doc => doc.data());
-            renderInvoicesTable();
-        });
-
+        }
+        
+        // Firebase listeners with proper initialization
+        setTimeout(() => {
+            // Initialize menu first
+            initializeMenu();
+            
+            // Then set up listeners
+            db.collection('menu').onSnapshot(snap => {
+                menuItems = snap.docs.map(doc => doc.data());
+                renderMenus();
+                renderMenuTable();
+            });
+        
+            db.collection('orders').onSnapshot(snap => {
+                orders = snap.docs.map(doc => doc.data());
+                renderAdminOrders(adminOrdersPage);
+                renderKitchenOrders(kitchenOrdersPage);
+            });
+        
+            db.collection('invoices').onSnapshot(snap => {
+                invoices = snap.docs.map(doc => doc.data());
+                renderInvoicesTable();
+            });
+        }, 1000);
+        
         function initialLoad() {
             renderMenus();
             renderMenuTable();
@@ -2213,7 +2354,17 @@
             renderInvoicesTable();
             handleFloatingBtnVisibility();
         }
-        initialLoad();
+        
+        // Call initial load when page ready
+        document.addEventListener('DOMContentLoaded', () => {
+            initialLoad();
+            if (window.innerWidth <= 600) {
+                sidebar.classList.add('collapsed');
+                sidebarOverlay.classList.add('hide');
+                document.body.classList.remove('menu-active');
+                sidebarOpen = false;
+            }
+        });
 
         // --- Tooltip Polyfill for Mobile ---
         document.querySelectorAll('.sidebar-link').forEach(btn => {
@@ -2256,14 +2407,6 @@
         }
         window.addEventListener('resize', adjustTouchTargets);
         document.addEventListener('DOMContentLoaded', adjustTouchTargets);
-
-        // --- Vars needed by the app ---
-        let menuItems = [];
-        let menuDetails = {};
-        let orders = [];
-        let invoices = [];
-        let telegramSentIds = new Set();
-        let menuEditId = null;
     </script>
 </body>
 </html>
