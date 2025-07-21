@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- SheetJS for Excel Export -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    <!-- jsPDF for PDF Invoice & Reports -->
+    <!-- jsPDF for PDF Invoice -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -40,14 +40,6 @@
             --action-btn-hover: #e34c00;
             --action-btn-pop-bg: #fff9e3;
             --action-btn-pop-border: #ff6d1a;
-            --sidebar-width: 210px;
-            --sidebar-bg: #fffdfa;
-            --sidebar-border: #ffe1c2;
-            --sidebar-active-bg: #ffeed8;
-            --sidebar-active-border: #ff6d1a;
-            --notif-success: #41d785;
-            --notif-error: #e34c00;
-            --notif-slide-duration: 0.6s;
         }
         html, body {
             min-height: 100%;
@@ -58,208 +50,8 @@
         }
         body {
             display: flex;
-            min-height: 100vh;
-        }
-        /* Sidebar Navigation */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--sidebar-bg);
-            border-right: 1.5px solid var(--sidebar-border);
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            padding: 1.5rem 0.6rem 1.5rem 0;
-            position: fixed;
-            top: 0; left: 0; bottom: 0;
-            z-index: 1200;
-            min-height: 100vh;
-            box-shadow: 1px 0 12px rgba(60,20,20,0.07);
-            transition: transform 0.35s cubic-bezier(.44,.88,.49,1.09), left 0.35s cubic-bezier(.44,.88,.49,1.09);
-        }
-        .sidebar.collapsed {
-            transform: translateX(-100%);
-            left: -210px;
-        }
-        .sidebar-logo {
-            text-align: center;
-            font-weight: 700;
-            font-size: 1.35rem;
-            color: var(--primary-dark);
-            margin-bottom: 2rem;
-            padding-left: 0.5rem;
-            letter-spacing: 0.5px;
-        }
-        .sidebar-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 0.7rem;
-        }
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            gap: 0.85rem;
-            font-size: 1.12rem;
-            padding: 0.72rem 1rem 0.72rem 1.5rem;
-            border-radius: var(--radius) 0 0 var(--radius);
-            color: var(--text);
-            background: none;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-            border-left: 5px solid transparent;
-            position: relative;
-            box-shadow: none;
-        }
-        .sidebar-link .fa {
-            font-size: 1.2rem;
-        }
-        .sidebar-link:hover,
-        .sidebar-link:focus {
-            background: var(--sidebar-active-bg);
-            color: var(--primary-dark);
-            box-shadow: 0 2px 12px rgba(60,20,20,0.06);
-        }
-        .sidebar-link.active {
-            background: var(--sidebar-active-bg);
-            color: var(--primary-dark);
-            border-left: 5px solid var(--sidebar-active-border);
-            box-shadow: 0 2px 12px rgba(60,20,20,0.16);
-        }
-        .sidebar-link.active .fa {
-            color: var(--primary-dark);
-            animation: icon-pop 0.5s cubic-bezier(.35,.85,.56,1.26) alternate;
-        }
-        .sidebar-link[data-tooltip]:hover:after,
-        .sidebar-link[data-tooltip]:focus:after {
-            content: attr(data-tooltip);
-            position: absolute;
-            left: 100%;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #312015;
-            color: #fff;
-            padding: 0.4em 0.8em;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            margin-left: 15px;
-            white-space: nowrap;
-            z-index: 2000;
-            opacity: 0.95;
-            pointer-events: none;
-            box-shadow: 0 2px 12px rgba(60,20,20,0.22);
-        }
-        @keyframes icon-pop {
-            0% { transform: scale(1);}
-            50% { transform: scale(1.22);}
-            100% { transform: scale(1);}
-        }
-        .sidebar-footer {
-            margin-top: auto;
-            text-align: center;
-            padding: 1rem 0.6rem;
-            font-size: 1rem;
-        }
-        .sidebar-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .sidebar-toggle-btn {
-            display: none;
-            position: fixed;
-            left: 16px;
-            top: 16px;
-            background: var(--primary-dark);
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            z-index: 1400;
-            cursor: pointer;
-            box-shadow: 0 2px 12px rgba(60,20,20,0.16);
-            font-size: 1.7rem;
-            align-items: center;
-            justify-content: center;
-        }
-        .sidebar-toggle-btn:active {
-            background: var(--primary);
-        }
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            left: 0; top: 0; right: 0; bottom: 0;
-            z-index: 1100;
-            background: rgba(60,20,20,0.12);
-        }
-        .sidebar-overlay.show {
-            display: block;
-        }
-        @media (max-width: 900px) {
-            .sidebar { width: 172px; }
-        }
-        @media (max-width: 600px) {
-            .sidebar { 
-                width: 210px; 
-                height: 100vh; 
-                min-height: unset; 
-                flex-direction: column; 
-                position: fixed; 
-                top: 0; 
-                left: 0; 
-                bottom: 0; 
-                z-index: 1350; 
-                border-right: 1.5px solid var(--sidebar-border); 
-                border-bottom: none; 
-                box-shadow: 1px 0 12px rgba(60,20,20,0.07);
-                transition: transform 0.35s cubic-bezier(.44,.88,.49,1.09);
-            }
-            .sidebar.collapsed { 
-                transform: translateX(-100%); 
-                left: 0;
-            }
-            .sidebar-logo { display: none; }
-            .sidebar-nav { flex-direction: column; gap: 0.3rem; }
-            .sidebar-link { border-radius: var(--radius); padding: 0.76rem 0.37rem; font-size: 1.05rem; border-left: none; }
-            .sidebar-footer { display: none; }
-            .sidebar-toggle-btn { display: flex; z-index: 1400; }
-            .sidebar-overlay {
-                display: block;
-                position: fixed;
-                left: 0; top: 0; right: 0; bottom: 0;
-                z-index: 1300;
-                background: rgba(60,20,20,0.22);
-                opacity: 1;
-                transition: opacity 0.35s cubic-bezier(.44,.88,.49,1.09);
-            }
-            .sidebar-overlay.hide {
-                display: none;
-                opacity: 0;
-            }
-            body.menu-active main {
-                pointer-events: none;
-                filter: blur(2px) brightness(0.98);
-            }
-        }
-        main {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding-top: 0;
-            padding-bottom: 0;
-            min-width: 0;
-            width: 100%;
-            display: flex;
             flex-direction: column;
             min-height: 100vh;
-            transition: margin-left 0.35s cubic-bezier(.44,.88,.49,1.09);
-        }
-        @media (max-width: 900px) {
-            main { margin-left: 172px; }
-        }
-        @media (max-width: 600px) {
-            main { margin-left: 0; margin-top: 0;}
         }
         header {
             background: var(--primary);
@@ -269,16 +61,40 @@
             align-items: center;
             justify-content: space-between;
             box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
         header h1 {
             font-size: 1.6rem;
             margin: 0;
             display: flex;
             align-items: center;
-            gap: 0.7rem;
+        }
+        nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.18s;
+            padding: 0.45rem 1.6rem;
+            border-radius: var(--radius);
+            position: relative;
+            box-shadow: none;
+            outline: none;
+        }
+        .nav-btn.active {
+            background: var(--nav-active);
+            color: var(--primary-dark);
+            box-shadow: 0 2px 16px rgba(60,20,20,0.17);
+            z-index: 2;
+        }
+        .nav-btn.active .fa, .nav-btn.active .fas {
+            color: var(--primary-dark);
         }
         .container {
             flex: 1;
@@ -350,9 +166,6 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        .btn:hover {
-            background: var(--primary-dark);
-        }
         .btn:disabled {
             background: #ffb97a;
             cursor: not-allowed;
@@ -360,9 +173,6 @@
         .btn-secondary {
             background: var(--secondary);
             color: var(--primary-dark);
-        }
-        .btn-secondary:hover {
-            background: var(--border);
         }
         .table-responsive {
             width: 100%;
@@ -375,51 +185,19 @@
             background: white;
             border-radius: var(--radius);
             overflow: hidden;
-            table-layout: auto;
         }
         th, td {
             padding: 0.9rem 0.6rem;
             text-align: left;
             border-bottom: 1px solid var(--border);
-            word-break: break-word;
-            font-size: 1rem;
         }
         th {
             background: var(--secondary);
             font-weight: 600;
             color: var(--primary-dark);
-            cursor: pointer;
         }
         tr:last-child td {
             border-bottom: none;
-        }
-        @media (max-width: 700px) {
-            table, thead, tbody, th, td, tr {
-                display: block;
-            }
-            thead {
-                display: none;
-            }
-            tr {
-                margin-bottom: 1.1rem;
-                background: #fff9e3;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(60,20,20,0.09);
-            }
-            td {
-                padding: 0.7rem 0.4rem;
-                border-bottom: none;
-                font-size: 0.97rem;
-                position: relative;
-            }
-            td:before {
-                content: attr(data-label);
-                font-weight: bold;
-                color: #e34c00;
-                display: block;
-                margin-bottom: 3px;
-                font-size: 0.91rem;
-            }
         }
         .status-badge {
             padding: 0.3rem 0.8rem;
@@ -443,14 +221,14 @@
             border: none;
             border-radius: var(--radius);
             font-weight: 700;
-            font-size: 1.13rem;
-            padding: 1.1rem 1.7rem;
+            font-size: 1rem;
+            padding: 0.7rem 1.2rem;
             cursor: pointer;
             box-shadow: 0 2px 8px rgba(60,20,20,0.13);
             position: relative;
             transition: background 0.18s, transform 0.22s;
             outline: none;
-            min-width: 140px;
+            min-width: 120px;
         }
         .action-btn:active,
         .action-btn.pop {
@@ -468,18 +246,10 @@
         .action-btn:hover {
             background: var(--action-btn-hover);
         }
-        @media (max-width: 700px) {
-            .action-btn {
-                min-width: 90px;
-                font-size: 0.95rem;
-                padding: 0.7rem 1rem;
-            }
-        }
         .notification {
             position: fixed;
             right: 1.2rem;
             top: 1.2rem;
-            min-width: 320px;
             background: var(--primary-dark);
             color: white;
             padding: 1rem 2rem;
@@ -488,33 +258,6 @@
             z-index: 9999;
             font-weight: 600;
             display: none;
-            opacity: 0;
-            transform: translateY(-60px);
-            transition: opacity var(--notif-slide-duration) cubic-bezier(.59,.31,.65,1.02), transform var(--notif-slide-duration) cubic-bezier(.59,.31,.65,1.02);
-        }
-        .notification.show {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .notification.success {
-            background: var(--notif-success);
-            color: #fff;
-            border: 2px solid #1abc72;
-        }
-        .notification.error {
-            background: var(--notif-error);
-            color: #fff;
-            border: 2px solid #a81b00;
-        }
-        @media (max-width: 600px) {
-            .notification {
-                min-width: 180px;
-                right: 0.6rem;
-                top: 0.6rem;
-                padding: 0.7rem 1rem;
-                font-size: 0.97rem;
-            }
         }
         .menu-section {
             margin-bottom: 2rem;
@@ -523,34 +266,6 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
             gap: 1.2rem;
-        }
-        @media (max-width: 700px) {
-            .menu-list { grid-template-columns: 1fr; gap: 0.7rem; }
-        }
-        .menu-panel {
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            margin-bottom: 1rem;
-            box-shadow: var(--shadow);
-            background: var(--secondary);
-            padding: 1rem;
-        }
-        .menu-panel-header {
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 1.13rem;
-            color: var(--primary-dark);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.7rem 1.2rem;
-        }
-        .menu-panel-content {
-            display: block;
-            padding: 0.8rem 0.2rem;
-        }
-        .menu-panel-content.hide {
-            display: none;
         }
         .menu-item {
             background: var(--secondary);
@@ -586,8 +301,8 @@
         }
         .qty-btn {
             font-size: 2rem;
-            width: 54px;
-            height: 54px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             border: none;
             background: var(--primary);
@@ -605,13 +320,44 @@
         }
         .menu-item-select span {
             font-size: 1.3rem;
-            min-width: 48px;
+            min-width: 42px;
             display: inline-block;
             text-align: center;
         }
-        @media (max-width: 600px) {
-            .qty-btn { font-size: 1.7rem; width: 62px; height: 62px; }
-            .menu-item-select span { font-size: 1.15rem; min-width: 40px; }
+        .footer {
+            background: var(--background-dark);
+            color: var(--secondary);
+            padding: 1.3rem 2rem;
+            text-align: center;
+            font-size: 1.1rem;
+            margin-top: auto;
+            border-top: 3px solid var(--primary);
+        }
+        .footer-buttons {
+            margin-top: 1.1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.8rem;
+            flex-wrap: wrap;
+        }
+        .footer-btn {
+            background: var(--secondary);
+            color: var(--primary-dark);
+            border: none;
+            border-radius: var(--radius);
+            padding: 0.5rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.18s;
+            margin-bottom: 0.3rem;
+            outline: none;
+            box-shadow: 0 2px 8px rgba(60, 20, 20, 0.09);
+        }
+        .footer-btn.active {
+            background: var(--primary-dark);
+            color: white;
+            box-shadow: 0 2px 12px rgba(60, 20, 20, 0.15);
         }
         .detailed-list {
             font-size: 0.98rem;
@@ -637,37 +383,35 @@
             gap: 0.7rem;
         }
         .kitchen-order-details { font-weight: 600; }
-        .kitchen-order-notes {
-            font-size: 0.99rem;
-            background: #fff7e3;
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            margin: 0.8rem 0;
-            border: 1px solid #ffdeb0;
-            color: #d2691e;
-        }
         @media (max-width: 900px) {
             .container { padding: 1rem 0.5rem; }
             .card { padding: 1rem; }
+            nav { gap: 1rem; }
+            .footer-buttons { gap: 0.8rem; }
         }
         @media (max-width: 600px) {
+            nav { flex-direction: column; gap: 0.4rem; }
+            header { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
+            .section-title { font-size: 1.05rem; }
             .container { padding: 0.5rem 0.2rem; }
             .card { padding: 0.5rem; }
             .menu-list { grid-template-columns: 1fr; gap: 0.7rem; }
             table { font-size: 0.92rem; }
             th, td { padding: 0.5rem 0.3rem; }
+            .footer { padding: 1rem 0.5rem; font-size: 0.93rem; }
+            .notification { padding: 0.7rem 1rem; font-size: 0.97rem; }
+            .qty-btn { font-size: 1.4rem; width: 38px; height: 38px; }
+            .menu-item-select span { font-size: 1rem; min-width: 32px; }
         }
         @media (max-width: 430px) {
+            .section-title { font-size: 0.85rem; }
             .container { padding: 0.1rem 0; }
             .menu-item-title { font-size: 0.99rem; }
+            .footer { font-size: 0.85rem; padding: 0.7rem 0.2rem; }
             th, td { font-size: 0.85rem; }
         }
-        .section { 
-            display: none; 
-        }
-        .section.active { 
-            display: block; 
-        }
+        .section { display: none; }
+        .section.active { display: block; }
         .order-history-log {
             font-size: 0.93rem;
             background: #f7ebd6;
@@ -707,38 +451,17 @@
             transform: translateX(-50%);
             z-index: 999;
             box-shadow: 0 4px 24px rgba(60,20,20,0.15);
-            padding: 1.1rem 2.8rem;
-            font-size: 1.18rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .floating-bottom-btn:hover {
-            background: var(--primary-dark);
+            padding: 0.85rem 2.3rem;
+            font-size: 1.13rem;
         }
         .floating-bottom-btn.hide {
             display: none;
         }
         @media (max-width: 600px) {
             .floating-bottom-btn {
-                font-size: 1.05rem;
-                padding: 0.8rem 1.6rem;
+                font-size: 0.97rem;
+                padding: 0.7rem 1.3rem;
                 bottom: 16px;
-                left: 50%;
-                right: auto;
-                max-width: 98vw;
-            }
-        }
-        @media (max-width: 430px) {
-            .floating-bottom-btn {
-                font-size: 0.92rem;
-                padding: 0.7rem 0.6rem;
-                min-width: 0;
-                left: 50%;
             }
         }
         .modal-overlay {
@@ -778,13 +501,6 @@
             color: var(--primary-dark);
             margin-bottom: 1rem;
         }
-        .modal-list {
-            margin-bottom: 1rem;
-            padding-left: 16px;
-        }
-        .modal-list li {
-            margin-bottom: 4px;
-        }
         .modal-buttons {
             display: flex;
             gap: 1rem;
@@ -796,419 +512,261 @@
             .modal-summary-details { font-size: 0.97rem; }
             .modal-total { font-size: 1.05rem; }
         }
-        .pagination-bar {
-            display: flex;
-            gap: 0.7rem;
-            align-items: center;
-            justify-content: flex-end;
-            margin-bottom: 1rem;
-            margin-top: 1rem;
-        }
-        .pagination-btn {
-            background: var(--secondary);
-            color: var(--primary-dark);
-            border: 1px solid var(--primary-dark);
-            border-radius: var(--radius);
-            padding: 0.45rem 1.1rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s, color 0.18s;
-            margin-bottom: 0.3rem;
-            outline: none;
-        }
-        .pagination-btn.active {
-            background: var(--primary-dark);
-            color: white;
-        }
-        .pagination-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-        /* Progress Bar */
-        .order-progress {
-            width: 100%;
-            background: #f7ebd6;
-            border-radius: 8px;
-            height: 14px;
-            margin-bottom: 10px;
-            overflow: hidden;
-            box-shadow: 0 1px 8px rgba(60,20,20,0.07);
-            position: relative;
-        }
-        .order-progress-inner {
-            height: 100%;
-            border-radius: 8px;
-            transition: width 1.1s cubic-bezier(.44,.88,.49,1.09);
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-        .order-progress-pending { background: #ffe1c2; }
-        .order-progress-cooking { background: linear-gradient(90deg,#ffe7b3 40%,#ffd54f 90%); animation: loading-bar-cooking 1.8s linear infinite; }
-        .order-progress-ready { background: #b3ffe3; }
-        .order-progress-completed { background: #e3d2ff; }
-        @keyframes loading-bar-cooking {
-            0% { background-position: 0;}
-            100% { background-position: 100;}
-        }
     </style>
 </head>
 <body>
-    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="Menu"><i class="fas fa-bars"></i></button>
-    <div class="sidebar-overlay hide" id="sidebar-overlay"></div>
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-logo">CRI Catering</div>
-        <div class="sidebar-nav">
-            <button id="nav-admin" class="sidebar-link active" data-tooltip="Input & Kelola Order"><i class="fas fa-user-cog"></i> <span>ADMIN</span></button>
-            <button id="nav-kitchen" class="sidebar-link" data-tooltip="Proses Pesanan Dapur"><i class="fas fa-utensils"></i> <span>KITCHEN</span></button>
-            <button id="nav-reports" class="sidebar-link" data-tooltip="Laporan & Ekspor"><i class="fas fa-file-excel"></i> <span>REPORT</span></button>
-            <button id="nav-menu" class="sidebar-link" data-tooltip="Kelola Menu"><i class="fas fa-book"></i> <span>EDIT MENU</span></button>
+    <header>
+        <div class="logo-title">
+            <h1>CRI Catering Admin</h1>
         </div>
-    </nav>
-    <main>
-        <header>
-            <h1><i class="fas fa-utensils"></i> CRI Catering Admin</h1>
-        </header>
-        <div class="notification" id="notification"></div>
-        <!-- MODAL Order Summary -->
-        <div class="modal-overlay" id="order-summary-modal">
-            <div class="modal">
-                <div class="modal-title"><i class="fas fa-file-alt"></i> Konfirmasi Order Sebelum Kirim ke Kitchen</div>
-                <div class="modal-summary-details" id="modal-summary-details"></div>
-                <ul class="modal-list" id="modal-summary-items"></ul>
-                <div class="modal-total" id="modal-summary-total"></div>
-                <div class="modal-buttons">
-                    <button class="btn btn-secondary" id="modal-edit-btn"><i class="fas fa-edit"></i> Edit Order</button>
-                    <button class="btn" id="modal-send-btn"><i class="fas fa-paper-plane"></i> Kirim ke Kitchen</button>
-                </div>
+        <nav>
+            <button id="nav-admin" class="nav-btn active"><i class="fas fa-user-cog"></i> Admin Dashboard</button>
+            <button id="nav-kitchen" class="nav-btn"><i class="fas fa-utensils"></i> Kitchen Dashboard</button>
+        </nav>
+    </header>
+    <div class="notification" id="notification"></div>
+    <!-- MODAL Order Summary -->
+    <div class="modal-overlay" id="order-summary-modal">
+        <div class="modal">
+            <div class="modal-title"><i class="fas fa-file-alt"></i> Konfirmasi Order Sebelum Kirim ke Kitchen</div>
+            <div class="modal-summary-details" id="modal-summary-details"></div>
+            <div class="modal-total" id="modal-summary-total"></div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="modal-edit-btn"><i class="fas fa-edit"></i> Edit Order</button>
+                <button class="btn" id="modal-send-btn"><i class="fas fa-paper-plane"></i> Kirim ke Kitchen</button>
             </div>
         </div>
-        <div class="container">
-            <!-- ADMIN Section -->
-            <section id="admin-section" class="section card active">
-                <div class="section-title"><i class="fas fa-user-cog"></i> ADMIN - Input Order</div>
-                <div id="edit-mode-bar" class="edit-mode-bar" style="display:none;">
-                    <strong>Edit Order Mode</strong>
-                    <span>You are editing order <span id="edit-order-id-bar"></span>. Make changes and click "Submit" to save, or "Cancel Edit" to discard changes.</span>
-                    <div class="edit-bar-btns">
-                        <button class="btn" id="edit-order-save-btn">Submit Edit</button>
-                        <button class="btn btn-secondary" id="edit-order-cancel-btn">Cancel Edit</button>
-                    </div>
+    </div>
+    <main class="container">
+        <!-- Admin Dashboard Section -->
+        <section id="admin-section" class="section card active">
+            <div class="section-title"><i class="fas fa-user-cog"></i> Admin Dashboard - Input Order</div>
+            <div id="edit-mode-bar" class="edit-mode-bar" style="display:none;">
+                <strong>Edit Order Mode</strong>
+                <span>You are editing order <span id="edit-order-id-bar"></span>. Make changes and click "Submit" to save, or "Cancel Edit" to discard changes.</span>
+                <div class="edit-bar-btns">
+                    <button class="btn" id="edit-order-save-btn">Submit Edit</button>
+                    <button class="btn btn-secondary" id="edit-order-cancel-btn">Cancel Edit</button>
                 </div>
-                <form id="order-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="customer-name">Customer Name</label>
-                            <input type="text" id="customer-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="delivery-time">Delivery Time</label>
-                            <input type="time" id="delivery-time" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="delivery-location">Delivery Location</label>
-                            <input type="text" id="delivery-location" required>
-                        </div>
-                    </div>
-                    <!-- Menu Panels -->
-                    <div class="menu-section">
-                        <div class="menu-panel" id="package-menu-panel">
-                            <div class="menu-panel-header" onclick="toggleMenuPanel('package')">
-                                <span><i class="fas fa-list"></i> Packages</span>
-                                <span id="package-panel-arrow"><i class="fas fa-chevron-down"></i></span>
-                            </div>
-                            <div class="menu-panel-content" id="package-menu-list"></div>
-                        </div>
-                        <div class="menu-panel" id="alacarte-menu-panel">
-                            <div class="menu-panel-header" onclick="toggleMenuPanel('alacarte')">
-                                <span><i class="fas fa-list"></i> Ala Carte</span>
-                                <span id="alacarte-panel-arrow"><i class="fas fa-chevron-down"></i></span>
-                            </div>
-                            <div class="menu-panel-content" id="alacarte-menu-list"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="order-notes">Additional Notes / Instructions (optional)</label>
-                        <textarea id="order-notes" rows="2"></textarea>
-                    </div>
-                    <button type="submit" class="btn" id="send-to-kitchen-btn" style="display:none;">Send to Kitchen</button>
-                </form>
-                <button type="button" class="btn floating-bottom-btn" id="floating-send-to-kitchen-btn">
-                    <i class="fas fa-paper-plane"></i> Send to Kitchen
-                </button>
-                <div class="divider"></div>
-                <div class="section-title"><i class="fas fa-list"></i> Orders to Kitchen</div>
-                <div id="admin-orders-pagination-bar" class="pagination-bar"></div>
-                <div class="order-group" id="admin-orders-pending">
-                    <div class="order-group-title pending">Belum Dimasak</div>
-                    <div class="table-responsive">
-                        <table id="admin-orders-table-pending">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Details</th>
-                                    <th>Delivery Time</th>
-                                    <th>Status</th>
-                                    <th>Progress</th>
-                                    <th>History</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="order-group" id="admin-orders-cooking">
-                    <div class="order-group-title cooking">Sedang Dimasak</div>
-                    <div class="table-responsive">
-                        <table id="admin-orders-table-cooking">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Details</th>
-                                    <th>Delivery Time</th>
-                                    <th>Status</th>
-                                    <th>Progress</th>
-                                    <th>History</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="order-group" id="admin-orders-ready">
-                    <div class="order-group-title ready">Siap Diantar</div>
-                    <div class="table-responsive">
-                        <table id="admin-orders-table-ready">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Details</th>
-                                    <th>Delivery Time</th>
-                                    <th>Status</th>
-                                    <th>Progress</th>
-                                    <th>History</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="order-group" id="admin-orders-completed">
-                    <div class="order-group-title completed">Selesai</div>
-                    <div class="table-responsive">
-                        <table id="admin-orders-table-completed">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Details</th>
-                                    <th>Delivery Time</th>
-                                    <th>Status</th>
-                                    <th>Progress</th>
-                                    <th>History</th>
-                                    <th>Invoice</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-            <!-- KITCHEN Section -->
-            <section id="kitchen-section" class="section card">
-                <div class="section-title"><i class="fas fa-utensils"></i> KITCHEN - Orders</div>
-                <div id="kitchen-orders-pagination-bar" class="pagination-bar"></div>
-                <div class="order-group" id="kitchen-orders-pending">
-                    <div class="order-group-title pending">Belum Dimasak</div>
-                    <div id="kitchen-pending-order-list"></div>
-                </div>
-                <div class="order-group" id="kitchen-orders-cooking">
-                    <div class="order-group-title cooking">Sedang Dimasak</div>
-                    <div id="kitchen-cooking-order-list"></div>
-                </div>
-                <div class="order-group" id="kitchen-orders-ready">
-                    <div class="order-group-title ready">Siap Diantar</div>
-                    <div id="kitchen-ready-order-list"></div>
-                </div>
-                <div class="order-group" id="kitchen-orders-completed">
-                    <div class="order-group-title completed">Selesai</div>
-                    <div id="kitchen-completed-order-list"></div>
-                </div>
-            </section>
-            <!-- REPORT Section -->
-            <section id="reports-section" class="section card">
-                <div class="section-title"><i class="fas fa-file-excel"></i> Reports & Excel/PDF Export</div>
+            </div>
+            <form id="order-form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="report-range">Report Date Range</label>
-                        <input type="date" id="report-start"> to
-                        <input type="date" id="report-end">
+                        <label for="customer-name">Customer Name</label>
+                        <input type="text" id="customer-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="report-type">Report Type</label>
-                        <select id="report-type">
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                        </select>
+                        <label for="delivery-time">Delivery Time</label>
+                        <input type="time" id="delivery-time" required>
                     </div>
                     <div class="form-group">
-                        <label for="report-status">Status</label>
-                        <select id="report-status">
-                            <option value="">All</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Cooking">Cooking</option>
-                            <option value="Ready">Ready</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="report-id">Order ID</label>
-                        <input type="text" id="report-id" placeholder="Search by Order ID">
-                    </div>
-                    <div class="form-group">
-                        <label for="report-customer">Customer Name</label>
-                        <input type="text" id="report-customer" placeholder="Search by Customer">
-                    </div>
-                    <div class="form-group">
-                        <label for="report-cols">Export Columns</label>
-                        <select id="report-cols" multiple>
-                            <option value="Order ID">Order ID</option>
-                            <option value="Date">Date</option>
-                            <option value="Customer">Customer</option>
-                            <option value="Order Details">Order Details</option>
-                            <option value="Status">Status</option>
-                            <option value="Delivery Time">Delivery Time</option>
-                            <option value="Timestamp Pending">Timestamp Pending</option>
-                            <option value="Timestamp Cooking">Timestamp Cooking</option>
-                            <option value="Timestamp Ready">Timestamp Ready</option>
-                            <option value="Timestamp Completed">Timestamp Completed</option>
-                        </select>
+                        <label for="delivery-location">Delivery Location</label>
+                        <input type="text" id="delivery-location" required>
                     </div>
                 </div>
-                <button class="btn" id="export-excel-btn"><i class="fas fa-file-export"></i> Export to Excel</button>
-                <button class="btn btn-secondary" id="export-pdf-btn"><i class="fas fa-file-pdf"></i> Export to PDF</button>
-                <div class="divider"></div>
-                <div class="section-title"><i class="fas fa-file-invoice"></i> Generated Invoices</div>
+                <div class="menu-section">
+                    <div class="section-title"><i class="fas fa-list"></i> Packages</div>
+                    <div class="menu-list" id="package-menu-list"></div>
+                </div>
+                <div class="menu-section">
+                    <div class="section-title"><i class="fas fa-list"></i> Ala Carte</div>
+                    <div class="menu-list" id="alacarte-menu-list"></div>
+                </div>
+                <div class="form-group">
+                    <label for="order-notes">Additional Notes / Instructions (optional)</label>
+                    <textarea id="order-notes" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn" id="send-to-kitchen-btn" style="display:none;">Send to Kitchen</button>
+            </form>
+            <button type="button" class="btn floating-bottom-btn" id="floating-send-to-kitchen-btn">
+                <i class="fas fa-paper-plane"></i> Send to Kitchen
+            </button>
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-list"></i> Orders to Kitchen</div>
+            <div class="order-group" id="admin-orders-pending">
+                <div class="order-group-title pending">Belum Dimasak</div>
                 <div class="table-responsive">
-                    <table id="invoices-table">
+                    <table id="admin-orders-table-pending">
                         <thead>
                             <tr>
-                                <th>Invoice ID</th>
                                 <th>Order ID</th>
                                 <th>Customer</th>
-                                <th>Total Price</th>
-                                <th>Completed Time</th>
-                                <th>Download</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </section>
-            <!-- EDIT MENU Section -->
-            <section id="menu-section" class="section card">
-                <div class="section-title"><i class="fas fa-book"></i> EDIT MENU</div>
-                <form id="menu-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="menu-type">Type</label>
-                            <select id="menu-type">
-                                <option value="package">Package</option>
-                                <option value="alacarte">Ala Carte</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="menu-name">Menu Name</label>
-                            <input type="text" id="menu-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="menu-desc">Description</label>
-                            <input type="text" id="menu-desc">
-                        </div>
-                        <div class="form-group">
-                            <label for="menu-price">Price (¥)</label>
-                            <input type="number" min="0" id="menu-price" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn"><i class="fas fa-plus"></i> Add Menu Item</button>
-                </form>
-                <div class="divider"></div>
-                <div class="section-title"><i class="fas fa-list"></i> Current Menu Items</div>
-                <div class="table-responsive">
-                    <table id="menu-table">
-                        <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Price</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>History</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
                 </div>
-            </section>
-            <!-- Edit Menu Modal -->
-            <div class="modal-overlay" id="menu-edit-modal">
-                <div class="modal">
-                    <div class="modal-title"><i class="fas fa-edit"></i> Edit Menu Item</div>
-                    <form id="menu-edit-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="edit-menu-type">Type</label>
-                                <select id="edit-menu-type">
-                                    <option value="package">Package</option>
-                                    <option value="alacarte">Ala Carte</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit-menu-name">Menu Name</label>
-                                <input type="text" id="edit-menu-name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit-menu-desc">Description</label>
-                                <input type="text" id="edit-menu-desc">
-                            </div>
-                            <div class="form-group">
-                                <label for="edit-menu-price">Price (¥)</label>
-                                <input type="number" min="0" id="edit-menu-price" required>
-                            </div>
-                        </div>
-                        <div class="modal-buttons">
-                            <button type="submit" class="btn"><i class="fas fa-check"></i> Save Changes</button>
-                            <button type="button" class="btn btn-secondary" id="menu-edit-cancel-btn"><i class="fas fa-times"></i> Cancel</button>
-                        </div>
-                    </form>
+            </div>
+            <div class="order-group" id="admin-orders-cooking">
+                <div class="order-group-title cooking">Sedang Dimasak</div>
+                <div class="table-responsive">
+                    <table id="admin-orders-table-cooking">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
-        </div>
+            <div class="order-group" id="admin-orders-ready">
+                <div class="order-group-title ready">Siap Diantar</div>
+                <div class="table-responsive">
+                    <table id="admin-orders-table-ready">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="order-group" id="admin-orders-completed">
+                <div class="order-group-title completed">Selesai</div>
+                <div class="table-responsive">
+                    <table id="admin-orders-table-completed">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Details</th>
+                                <th>Delivery Time</th>
+                                <th>Status</th>
+                                <th>History</th>
+                                <th>Invoice</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <!-- Kitchen Dashboard Section -->
+        <section id="kitchen-section" class="section card">
+            <div class="section-title"><i class="fas fa-utensils"></i> Kitchen Dashboard - Orders</div>
+            <div class="order-group" id="kitchen-orders-pending">
+                <div class="order-group-title pending">Belum Dimasak</div>
+                <div id="kitchen-pending-order-list"></div>
+            </div>
+            <div class="order-group" id="kitchen-orders-cooking">
+                <div class="order-group-title cooking">Sedang Dimasak</div>
+                <div id="kitchen-cooking-order-list"></div>
+            </div>
+            <div class="order-group" id="kitchen-orders-ready">
+                <div class="order-group-title ready">Siap Diantar</div>
+                <div id="kitchen-ready-order-list"></div>
+            </div>
+            <div class="order-group" id="kitchen-orders-completed">
+                <div class="order-group-title completed">Selesai</div>
+                <div id="kitchen-completed-order-list"></div>
+            </div>
+        </section>
+        <!-- Reports & Export Section -->
+        <section id="reports-section" class="section card">
+            <div class="section-title"><i class="fas fa-file-excel"></i> Reports & Excel Export</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="report-range">Report Date Range</label>
+                    <input type="date" id="report-start"> to
+                    <input type="date" id="report-end">
+                </div>
+                <div class="form-group">
+                    <label for="report-type">Report Type</label>
+                    <select id="report-type">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" id="export-excel-btn"><i class="fas fa-file-export"></i> Export to Excel</button>
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-file-invoice"></i> Generated Invoices</div>
+            <div class="table-responsive">
+                <table id="invoices-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice ID</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total Price</th>
+                            <th>Completed Time</th>
+                            <th>Download</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+        <!-- Menu Management Section -->
+        <section id="menu-section" class="section card">
+            <div class="section-title"><i class="fas fa-book"></i> Menu Management</div>
+            <form id="menu-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="menu-type">Type</label>
+                        <select id="menu-type">
+                            <option value="package">Package</option>
+                            <option value="alacarte">Ala Carte</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu-name">Menu Name</label>
+                        <input type="text" id="menu-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu-desc">Description</label>
+                        <input type="text" id="menu-desc">
+                    </div>
+                    <div class="form-group">
+                        <label for="menu-price">Price (¥)</label>
+                        <input type="number" min="0" id="menu-price" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn"><i class="fas fa-plus"></i> Add Menu Item</button>
+            </form>
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-list"></i> Current Menu Items</div>
+            <div class="table-responsive">
+                <table id="menu-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
     </main>
+    <footer class="footer">
+        &copy; 2025 CRI | <a href="https://t.me/CriFood" target="_blank" style="color: #ff6d1a;">Telegram Channel</a>
+        <div class="footer-buttons">
+            <button id="footer-reports" class="footer-btn"><i class="fas fa-file-excel"></i> Reports & Export</button>
+            <button id="footer-menu" class="footer-btn"><i class="fas fa-book"></i> Menu Management</button>
+        </div>
+    </footer>
     <script>
-        // Global Variables
-        let orders = [];
-        let invoices = [];
-        let menuItems = [];
-        let menuDetails = {};
-        let telegramSentIds = new Set();
-        let menuEditId = null;
-        let editOrderMode = false;
-        let editOrderId = null;
-        let previousOrderData = null;
-        let adminOrdersPage = 1;
-        let kitchenOrdersPage = 1;
-        let sidebarOpen = false;
-
-        // Constants
-        const DEFAULT_TZ = 'Asia/Bangkok';
-        const PAGE_SIZE = 8;
-
-        // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBoDQI5RgVlDOgYfs4qBIEjJPEBJG_rSJU",
             authDomain: "cita-rasa-indo.firebaseapp.com",
@@ -1221,30 +779,138 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Initialize Day.js plugins
         dayjs.extend(dayjs_plugin_utc);
         dayjs.extend(dayjs_plugin_timezone);
 
-        // DOM Elements
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const DEFAULT_TZ = 'Asia/Bangkok';
 
-        // Utility Functions
-        function showNotification(msg, duration = 2500, type = 'info') {
+        const defaultMenuSeed = [
+            {id:"package_payalur_bakwan", type:"package", name:"PAYALUR", desc:"Nasi Putih dan Ayam Goreng + Telur Balado + Bakwan Sayur + Sayur dan Sambal", price:35},
+            {id:"package_payalur_kentang", type:"package", name:"PAYALUR", desc:"Nasi Putih dan Ayam Goreng + Telur Balado + Kentang Balado + Sayur dan Sambal", price:35},
+            {id:"package_payalit_telur", type:"package", name:"PAYALIT", desc:"Nasi Putih dan Ayam Goreng + Telur + Sayur dan Sambal", price:30},
+            {id:"package_payalit_bakwan", type:"package", name:"PAYALIT", desc:"Nasi Putih dan Ayam Goreng + Bakwan Sayur + Sayur dan Sambal", price:30},
+            {id:"package_payamat", type:"package", name:"PAYAMAT", desc:"Nasi Putih dan Ayam Goreng + Sayur dan Sambal", price:25},
+            {id:"package_palutang", type:"package", name:"PALUTANG", desc:"Nasi Putih dan Telur Balado + Kentang Balado + Bakwan Sayur + Sayur", price:25},
+            {id:"package_palur", type:"package", name:"PALUR", desc:"Nasi Putih dan Telur Balado + Bakwan Sayur + Sayur", price:20},
+            {id:"package_prames_a", type:"package", name:"PRAMES A", desc:"Nasi Putih + Ayam Goreng + Tahu + Timun + Sambal + Kremesan", price:25},
+            {id:"package_prames_b", type:"package", name:"PRAMES B", desc:"Nasi Putih + Ayam Goreng + Telur Balado + Tahu + Timun + Sambal + Kremesan", price:33},
+            {id:"package_prames_c", type:"package", name:"PRAMES C", desc:"Nasi Putih + Ayam Goreng + Kentang Balado + Tahu + Timun + Sambal + Kremesan", price:30},
+            {id:"package_prames_veggie", type:"package", name:"PRAMES VEGGIE", desc:"Nasi Putih + Tahu + Timun + Sambal + Kremesan", price:15},
+            {id:"alacarte_ayam_goreng", type:"alacarte", name:"Ayam Goreng", desc:"Ala Carte", price:15},
+            {id:"alacarte_telur_balado", type:"alacarte", name:"Telur Balado", desc:"Ala Carte", price:10},
+            {id:"alacarte_bakwan_sayur", type:"alacarte", name:"Bakwan Sayur", desc:"Ala Carte", price:5},
+            {id:"alacarte_kentang_balado", type:"alacarte", name:"Kentang Balado", desc:"Ala Carte", price:10},
+            {id:"alacarte_tahu", type:"alacarte", name:"Tahu", desc:"Ala Carte", price:5},
+        ];
+        const menuDetails = {
+            'PAYALUR BAKWAN': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Telur Balado',
+                'Bakwan Sayur atau Kentang Balado',
+                'Sayur',
+                'Sambal'
+            ],
+            'PAYALUR KENTANG': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Telur Balado',
+                'Kentang Balado',
+                'Sayur',
+                'Sambal'
+            ],
+            'PAYALIT TELUR': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Telur Balado',
+                'Sayur',
+                'Sambal'
+            ],
+            'PAYALIT BAKWAN': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Bakwan Sayur',
+                'Sayur',
+                'Sambal'
+            ],
+            'PAYAMAT': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Sayur',
+                'Sambal'
+            ],
+            'PALUTANG': [
+                'Nasi Putih',
+                'Telur Balado',
+                'Kentang Balado',
+                'Bakwan Sayur',
+                'Sayur'
+            ],
+            'PALUR': [
+                'Nasi Putih',
+                'Telur Balado',
+                'Bakwan Sayur',
+                'Sayur'
+            ],
+            'PRAMES A': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Tahu',
+                'Timun',
+                'Sambal',
+                'Kremesan'
+            ],
+            'PRAMES B': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Telur Balado',
+                'Tahu',
+                'Timun',
+                'Sambal',
+                'Kremesan'
+            ],
+            'PRAMES C': [
+                'Nasi Putih',
+                'Ayam Goreng',
+                'Kentang Balado',
+                'Tahu',
+                'Timun',
+                'Sambal',
+                'Kremesan'
+            ],
+            'PRAMES VEGGIE': [
+                'Nasi Putih',
+                'Tahu',
+                'Timun',
+                'Sambal',
+                'Kremesan'
+            ]
+        };
+
+        let menuItems = [];
+        let orders = [];
+        let invoices = [];
+        let telegramSentIds = new Set();
+        let menuSeeded = false;
+
+        async function seedMenuIfNeeded() {
+            const snap = await db.collection('menu').get();
+            if (snap.empty) {
+                for (const mi of defaultMenuSeed) {
+                    await db.collection('menu').doc(mi.id).set(mi);
+                }
+                menuSeeded = true;
+                showNotification("Menu default berhasil di-seed! Silakan refresh di device lain.");
+            }
+        }
+        seedMenuIfNeeded();
+
+        function showNotification(msg, duration = 2500) {
             const notif = document.getElementById('notification');
             notif.innerText = msg;
-            notif.classList.remove('success','error','show');
-            if (type === 'success') notif.classList.add('success');
-            else if (type === 'error') notif.classList.add('error');
-            notif.classList.add('show');
-            setTimeout(() => {
-                notif.classList.remove('show');
-                setTimeout(() => { notif.style.display = 'none'; }, 400);
-            }, duration);
             notif.style.display = 'block';
+            setTimeout(() => notif.style.display = 'none', duration);
         }
-
         function formatStatus(status) {
             switch(status) {
                 case "Pending": return `<span class="status-badge status-pending">Pending</span>`;
@@ -1254,7 +920,6 @@
                 default: return status;
             }
         }
-
         function formatDateTime(ts) {
             if (!ts) return '';
             let d;
@@ -1269,120 +934,81 @@
             }
             return d.tz(DEFAULT_TZ).format('YYYY-MM-DD HH:mm');
         }
-
         function calcOrderTotal(order) {
             let total = 0;
-            for (const pkg of order.packages || []) {
+            for (const pkg of order.packages) {
                 const mi = menuItems.find(m => m.id === pkg.menuId);
                 if (mi) total += mi.price * pkg.qty;
             }
-            for (const ac of order.alacarte || []) {
+            for (const ac of order.alacarte) {
                 const mi = menuItems.find(m => m.id === ac.menuId);
                 if (mi) total += mi.price * ac.qty;
             }
             return total;
         }
-
-        function setDefaultDeliveryTime() {
-            const input = document.getElementById('delivery-time');
-            if (!input) return;
-            const now = new Date();
-            const pad = n => String(n).padStart(2, '0');
-            input.value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        function autoFileNameReport(type, start, end) {
+            let s = start ? start.replaceAll('-', '_') : '';
+            let e = end ? end.replaceAll('-', '_') : '';
+            return `report_${type}_${s}_${e}.xlsx`;
         }
-
-        // Sidebar Functions
-        function openSidebar() {
-            sidebar.classList.remove('collapsed');
-            sidebarOverlay.classList.remove('hide');
-            document.body.classList.add('menu-active');
-            sidebarOpen = true;
-        }
-
-        function closeSidebar() {
-            sidebar.classList.add('collapsed');
-            sidebarOverlay.classList.add('hide');
-            document.body.classList.remove('menu-active');
-            sidebarOpen = false;
-        }
-
-        function toggleSidebar() {
-            if (sidebarOpen) closeSidebar();
-            else openSidebar();
-        }
-
-        function setSidebarActive(navId) {
-            document.querySelectorAll('.sidebar-link').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(navId).classList.add('active');
-        }
-
+        const sections = ['admin-section','kitchen-section','reports-section','menu-section'];
         function showSection(secId) {
-            console.log('Switching to section:', secId);
-            ['admin-section','kitchen-section','reports-section','menu-section'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.classList.remove('active');
-                }
+            sections.forEach(id => {
+                document.getElementById(id).classList.remove('active');
             });
-            const targetSection = document.getElementById(secId);
-            if (targetSection) {
-                targetSection.classList.add('active');
-                console.log('Section', secId, 'is now active');
-            } else {
-                console.error('Section not found:', secId);
-            }
+            document.getElementById(secId).classList.add('active');
             window.scrollTo(0,0);
-            // Call render functions if they exist
-            if (typeof renderAdminOrders === 'function') renderAdminOrders();
-            if (typeof renderKitchenOrders === 'function') renderKitchenOrders();
+            renderAdminOrders();
+            renderKitchenOrders();
             handleFloatingBtnVisibility();
-            if(secId === 'reports-section' && typeof renderInvoicesTable === 'function') renderInvoicesTable();
+        }
+        document.getElementById('nav-admin').onclick = function() {
+            showSection('admin-section');
+            setNavActive('nav-admin');
+        };
+        document.getElementById('nav-kitchen').onclick = function() {
+            showSection('kitchen-section');
+            setNavActive('nav-kitchen');
+        };
+        document.getElementById('footer-reports').onclick = function() {
+            showSection('reports-section');
+            setFooterActive('footer-reports');
+        };
+        document.getElementById('footer-menu').onclick = function() {
+            showSection('menu-section');
+            setFooterActive('footer-menu');
+        };
+        function setNavActive(navId) {
+            document.getElementById('nav-admin').classList.remove('active');
+            document.getElementById('nav-kitchen').classList.remove('active');
+            document.getElementById(navId).classList.add('active');
+            document.getElementById('footer-reports').classList.remove('active');
+            document.getElementById('footer-menu').classList.remove('active');
+            handleFloatingBtnVisibility();
+        }
+        function setFooterActive(footerId) {
+            document.getElementById('footer-reports').classList.remove('active');
+            document.getElementById('footer-menu').classList.remove('active');
+            document.getElementById(footerId).classList.add('active');
+            document.getElementById('nav-admin').classList.remove('active');
+            document.getElementById('nav-kitchen').classList.remove('active');
+            handleFloatingBtnVisibility();
         }
 
-        // Panel Functions
-        function toggleMenuPanel(type) {
-            const panelContent = document.getElementById(type + '-menu-list');
-            const arrow = document.getElementById(type + '-panel-arrow');
-            if (panelContent && arrow) {
-                if (panelContent.classList.contains('hide')) {
-                    panelContent.classList.remove('hide');
-                    arrow.innerHTML = '<i class="fas fa-chevron-down"></i>';
-                } else {
-                    panelContent.classList.add('hide');
-                    arrow.innerHTML = '<i class="fas fa-chevron-right"></i>';
-                }
-            }
-        }
-
-        // Menu Functions
         window.changeQty = function(inputId, delta) {
             const input = document.getElementById(inputId);
             const display = document.getElementById(inputId + '_display');
-            if (input && display) {
-                let val = Number(input.value);
-                val = Math.max(0, val + delta);
-                input.value = val;
-                display.innerText = val;
-            }
+            let val = Number(input.value);
+            val = Math.max(0, val + delta);
+            input.value = val;
+            display.innerText = val;
         };
 
         function renderMenus() {
-            if (!menuItems || menuItems.length === 0) {
-                console.log('No menu items to render');
-                return;
-            }
-            
             const pkgList = document.getElementById('package-menu-list');
             const acList = document.getElementById('alacarte-menu-list');
-            
-            if (!pkgList || !acList) {
-                console.error('Menu containers not found');
-                return;
-            }
-            
             pkgList.innerHTML = '';
             acList.innerHTML = '';
-            
             for (const mi of menuItems.filter(m => m.type === 'package')) {
                 pkgList.innerHTML += `
                     <div class="menu-item">
@@ -1400,13 +1026,12 @@
                     </div>
                 `;
             }
-            
             for (const mi of menuItems.filter(m => m.type === 'alacarte')) {
                 acList.innerHTML += `
                     <div class="menu-item">
                         <div class="menu-item-title">${mi.name}</div>
                         <div class="menu-item-price">¥${mi.price}</div>
-                        <div class="menu-item-desc">${mi.desc || ''}</div>
+                        <div class="menu-item-desc">${mi.desc}</div>
                         <div class="menu-item-select">
                             <button type="button" class="qty-btn" onclick="changeQty('ac_${mi.id}_qty', -1)">&#8722;</button>
                             <span id="ac_${mi.id}_qty_display">0</span>
@@ -1416,136 +1041,68 @@
                     </div>
                 `;
             }
-            console.log('Menus rendered successfully');
         }
-
         function renderMenuTable() {
-            const menuTable = document.getElementById('menu-table');
-            if (!menuTable || !menuItems) return;
-            
-            const tb = menuTable.getElementsByTagName('tbody')[0];
-            if (!tb) return;
-            
+            const tb = document.getElementById('menu-table').getElementsByTagName('tbody')[0];
             tb.innerHTML = '';
             for (const mi of menuItems) {
                 tb.innerHTML += `<tr>
                     <td>${mi.type.charAt(0).toUpperCase()+mi.type.slice(1)}</td>
                     <td>${mi.name}</td>
-                    <td>${mi.desc || ''}</td>
+                    <td>${mi.desc}</td>
                     <td>¥${mi.price}</td>
                     <td>
-                        <button class="btn btn-secondary" onclick="showMenuEditModal('${mi.id}')"><i class="fas fa-edit"></i></button>
                         <button class="btn btn-secondary" onclick="removeMenuItem('${mi.id}')"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
             }
         }
-
-        window.showMenuEditModal = function(id) {
-            menuEditId = id;
-            const mi = menuItems.find(m => m.id === id);
-            if (!mi) return showNotification('Menu not found!', 2500, 'error');
-            document.getElementById('edit-menu-type').value = mi.type;
-            document.getElementById('edit-menu-name').value = mi.name;
-            document.getElementById('edit-menu-desc').value = mi.desc || '';
-            document.getElementById('edit-menu-price').value = mi.price;
-            document.getElementById('menu-edit-modal').style.display = 'flex';
-        };
-
         window.removeMenuItem = async function(id) {
-            if (confirm('Are you sure you want to delete this menu item?')) {
-                await db.collection('menu').doc(id).delete();
-                showNotification('Menu item removed!', 2000, 'success');
-            }
+            await db.collection('menu').doc(id).delete();
+            showNotification('Menu item removed!');
+        };
+        document.getElementById('menu-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const type = document.getElementById('menu-type').value;
+            const name = document.getElementById('menu-name').value.trim();
+            const desc = document.getElementById('menu-desc').value.trim();
+            const price = Number(document.getElementById('menu-price').value);
+            if (!name || isNaN(price) || price <= 0) return showNotification('Invalid menu item!');
+            const id = `${type}_${name.replace(/\s+/g,'_').toLowerCase()}_${Math.floor(Math.random()*100000)}`;
+            await db.collection('menu').doc(id).set({id, type, name, desc, price});
+            showNotification('Menu item added!');
+            document.getElementById('menu-form').reset();
         };
 
-        // Order Rendering Functions
-        function renderAdminOrders(page=1) {
-            adminOrdersPage = page;
-            if (!orders) return;
-            
-            let pendingOrders = orders.filter(o=>o.status==='Pending');
-            renderOrdersTable('admin-orders-table-pending', pendingOrders.slice((adminOrdersPage-1)*PAGE_SIZE, adminOrdersPage*PAGE_SIZE), true);
-
-            let cookingOrders = orders.filter(o=>o.status==='Cooking');
-            renderOrdersTable('admin-orders-table-cooking', cookingOrders, false);
-
-            let readyOrders = orders.filter(o=>o.status==='Ready');
-            renderOrdersTable('admin-orders-table-ready', readyOrders, false);
-
-            let completedOrders = orders.filter(o=>o.status==='Completed');
-            renderOrdersTable('admin-orders-table-completed', completedOrders, false, true);
+        function renderAdminOrders() {
+            renderOrdersTable('admin-orders-table-pending', orders.filter(o=>o.status==='Pending'), true);
+            renderOrdersTable('admin-orders-table-cooking', orders.filter(o=>o.status==='Cooking'));
+            renderOrdersTable('admin-orders-table-ready', orders.filter(o=>o.status==='Ready'));
+            renderOrdersTable('admin-orders-table-completed', orders.filter(o=>o.status==='Completed'), false, true);
         }
 
-        function renderKitchenOrders(page=1) {
-            kitchenOrdersPage = page;
-            if (!orders) return;
-            
-            let pendingOrders = orders.filter(o=>o.status==='Pending');
-            renderKitchenOrderCards('kitchen-pending-order-list', pendingOrders.slice((kitchenOrdersPage-1)*PAGE_SIZE, kitchenOrdersPage*PAGE_SIZE));
+        function renderKitchenOrders() {
+            renderKitchenOrderCards('kitchen-pending-order-list', orders.filter(o=>o.status==='Pending'));
             renderKitchenOrderCards('kitchen-cooking-order-list', orders.filter(o=>o.status==='Cooking'));
             renderKitchenOrderCards('kitchen-ready-order-list', orders.filter(o=>o.status==='Ready'));
             renderKitchenOrderCards('kitchen-completed-order-list', orders.filter(o=>o.status==='Completed'), true);
         }
-
-        function renderOrdersTable(tableId, orderArr, editable, showInvoice) {
-            const table = document.getElementById(tableId);
-            if (!table) return;
-            
-            const tb = table.getElementsByTagName('tbody')[0];
-            if (!tb) return;
-            
-            tb.innerHTML = '';
-            const sorted = orderArr.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-            for (const ord of sorted) {
-                tb.innerHTML += `<tr>
-                    <td data-label="Order ID">${ord.id}</td>
-                    <td data-label="Customer">${ord.customer}</td>
-                    <td data-label="Details">${renderOrderDetails(ord)}</td>
-                    <td data-label="Delivery Time">${formatDateTime(ord.deliveryTime)}</td>
-                    <td data-label="Status">${formatStatus(ord.status)}</td>
-                    <td data-label="Progress">
-                        <div class="order-progress">
-                            <div class="order-progress-inner order-progress-${ord.status.toLowerCase()}" style="width:${getOrderProgressPercent(ord.status)}%;"></div>
-                        </div>
-                    </td>
-                    <td data-label="History"><div class="order-history-log">${renderOrderHistory(ord)}</div></td>
-                    ${editable ? `<td data-label="Actions">
-                        <div class="edit-cancel-btns">
-                            <button class="btn btn-secondary" onclick="editOrder('${ord.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-secondary" onclick="cancelOrder('${ord.id}')"><i class="fas fa-times"></i></button>
-                        </div>
-                    </td>` : ''}
-                    ${showInvoice ? `<td data-label="Invoice">
-                        <button class="btn btn-secondary" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i> Download</button>
-                    </td>` : ''}
-                </tr>`;
-            }
-        }
-
         function renderKitchenOrderCards(containerId, orderArr, showInvoice) {
             const container = document.getElementById(containerId);
-            if (!container) return;
-            
             container.innerHTML = '';
             const sorted = orderArr.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
             for (const ord of sorted) {
                 container.innerHTML += kitchenOrderCardHtml(ord, showInvoice);
             }
         }
-
         function kitchenOrderCardHtml(ord, showInvoice) {
             return `
             <div class="kitchen-order-card">
                 <div><b>Order ID:</b> ${ord.id}</div>
                 <div><b>Customer:</b> ${ord.customer}</div>
-                <div class="order-progress">
-                    <div class="order-progress-inner order-progress-${ord.status.toLowerCase()}" style="width:${getOrderProgressPercent(ord.status)}%;"></div>
-                </div>
                 <div><b>Details:</b> ${renderOrderDetailsKitchen(ord)}</div>
                 <div><b>Delivery:</b> ${formatDateTime(ord.deliveryTime)}</div>
                 <div><b>Status:</b> ${formatStatus(ord.status)}</div>
-                ${ord.notes && ord.notes.trim() !== "" ? `<div class="kitchen-order-notes"><b>Notes:</b> ${ord.notes}</div>` : ''}
                 <div class="kitchen-order-actions">
                     ${ord.status === 'Pending' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Cooking', this)">Start Cooking</button>` : ''}
                     ${ord.status === 'Cooking' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Ready', this)">Ready for Delivery</button>` : ''}
@@ -1555,7 +1112,58 @@
             </div>
             `;
         }
-
+        function renderOrderDetailsKitchen(ord) {
+            let html = '';
+            if (ord.packages && ord.packages.length) {
+                html += `<b>Package:</b><ul class="detailed-list">`;
+                for (const pkg of ord.packages) {
+                    const mi = menuItems.find(m => m.id === pkg.menuId);
+                    if (mi) {
+                        html += `<li><b>${mi.name} x${pkg.qty}</b>`;
+                        if (menuDetails[mi.name]) {
+                            html += `<ul class="detailed-list">${menuDetails[mi.name].map(i=>`<li>${i}</li>`).join('')}</ul>`;
+                        }
+                        html += `</li>`;
+                    }
+                }
+                html += `</ul>`;
+            }
+            if (ord.alacarte && ord.alacarte.length) {
+                html += `<b>Ala Carte:</b><ul class="detailed-list">`;
+                for (const ac of ord.alacarte) {
+                    const mi = menuItems.find(m => m.id === ac.menuId);
+                    if (mi) {
+                        html += `<li>${mi.name} x${ac.qty}</li>`;
+                    }
+                }
+                html += `</ul>`;
+            }
+            return html;
+        }
+        function renderOrdersTable(tableId, orderArr, editable, showInvoice) {
+            const tb = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            tb.innerHTML = '';
+            const sorted = orderArr.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+            for (const ord of sorted) {
+                tb.innerHTML += `<tr>
+                    <td>${ord.id}</td>
+                    <td>${ord.customer}</td>
+                    <td>${renderOrderDetails(ord)}</td>
+                    <td>${formatDateTime(ord.deliveryTime)}</td>
+                    <td>${formatStatus(ord.status)}</td>
+                    <td><div class="order-history-log">${renderOrderHistory(ord)}</div></td>
+                    ${editable ? `<td>
+                        <div class="edit-cancel-btns">
+                            <button class="btn btn-secondary" onclick="editOrder('${ord.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-secondary" onclick="cancelOrder('${ord.id}')"><i class="fas fa-times"></i></button>
+                        </div>
+                    </td>` : ''}
+                    ${showInvoice ? `<td>
+                        <button class="btn btn-secondary" onclick="downloadInvoicePdf('${ord.id}')"><i class="fas fa-file-pdf"></i> Download</button>
+                    </td>` : ''}
+                </tr>`;
+            }
+        }
         function renderOrderDetails(ord) {
             let html = '';
             if (ord.packages && ord.packages.length) {
@@ -1585,12 +1193,169 @@
             html += `<b>Notes:</b> ${ord.notes || '-'}`;
             return html;
         }
+        function renderOrderHistory(ord) {
+            const logs = [];
+            if (ord.createdAt) logs.push(`Pending: ${formatDateTime(ord.createdAt)}`);
+            if (ord.cookingAt) logs.push(`Cooking: ${formatDateTime(ord.cookingAt)}`);
+            if (ord.readyAt) logs.push(`Ready: ${formatDateTime(ord.readyAt)}`);
+            if (ord.completedAt) logs.push(`Completed: ${formatDateTime(ord.completedAt)}`);
+            return logs.join('<br>');
+        }
 
-        function renderOrderDetailsKitchen(ord) {
-            let html = '';
-            if (ord.packages && ord.packages.length) {
+        // --- Edit Order Mode ---
+        let editOrderMode = false;
+        let editOrderId = null;
+        let previousOrderData = null;
+        function showEditModeBar(orderId) {
+            document.getElementById('edit-mode-bar').style.display = 'flex';
+            document.getElementById('edit-order-id-bar').innerText = orderId;
+            document.getElementById('send-to-kitchen-btn').style.display = 'none';
+            document.getElementById('floating-send-to-kitchen-btn').classList.add('hide');
+            document.getElementById('order-form').querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+        }
+        function hideEditModeBar() {
+            document.getElementById('edit-mode-bar').style.display = 'none';
+            document.getElementById('send-to-kitchen-btn').style.display = '';
+            editOrderMode = false;
+            editOrderId = null;
+            previousOrderData = null;
+            document.getElementById('order-form').reset();
+            setDefaultDeliveryTime();
+            renderMenus();
+            handleFloatingBtnVisibility();
+        }
+        window.editOrder = function(orderId) {
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return showNotification('Order not found!');
+            if (ord.status !== "Pending") return showNotification('Order hanya bisa diedit saat status Pending!');
+            editOrderMode = true;
+            editOrderId = orderId;
+            previousOrderData = JSON.parse(JSON.stringify(ord));
+            showEditModeBar(orderId);
+            document.getElementById('customer-name').value = ord.customer;
+            document.getElementById('delivery-location').value = ord.deliveryLocation;
+            document.getElementById('order-notes').value = ord.notes || '';
+            let dtLocal = dayjs.utc(ord.deliveryTime).tz(DEFAULT_TZ).format('HH:mm');
+            document.getElementById('delivery-time').value = dtLocal;
+            for (const mi of menuItems.filter(m=>m.type==='package')) {
+                const pkg = ord.packages.find(p=>p.menuId===mi.id);
+                document.getElementById(`pkg_${mi.id}_qty`).value = pkg ? pkg.qty : 0;
+                document.getElementById(`pkg_${mi.id}_qty_display`).innerText = pkg ? pkg.qty : 0;
+            }
+            for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
+                const ac = ord.alacarte.find(a=>a.menuId===mi.id);
+                document.getElementById(`ac_${mi.id}_qty`).value = ac ? ac.qty : 0;
+                document.getElementById(`ac_${mi.id}_qty_display`).innerText = ac ? ac.qty : 0;
+            }
+        };
+        document.getElementById('edit-order-save-btn').onclick = async function() {
+            if (!editOrderMode || !editOrderId) return;
+            const customer = document.getElementById('customer-name').value.trim();
+            const deliveryTimeInput = document.getElementById('delivery-time').value;
+            const deliveryLocation = document.getElementById('delivery-location').value.trim();
+            const notes = document.getElementById('order-notes').value.trim();
+            const packages = [];
+            for (const mi of menuItems.filter(m=>m.type==='package')) {
+                const qty = Number(document.getElementById(`pkg_${mi.id}_qty`).value);
+                if (qty > 0) packages.push({menuId: mi.id, qty});
+            }
+            const alacarte = [];
+            for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
+                const qty = Number(document.getElementById(`ac_${mi.id}_qty`).value);
+                if (qty > 0) alacarte.push({menuId: mi.id, qty});
+            }
+            if (!customer || !deliveryTimeInput || !deliveryLocation || (!packages.length && !alacarte.length)) {
+                showNotification('Please fill all required fields and select items.');
+                return;
+            }
+            const now = dayjs().tz(DEFAULT_TZ);
+            const deliveryTime = dayjs.tz(`${now.format('YYYY-MM-DD')}T${deliveryTimeInput}`, DEFAULT_TZ).utc().toISOString();
+            const order = {
+                id: editOrderId,
+                customer,
+                deliveryTime: deliveryTime,
+                deliveryLocation,
+                notes,
+                packages,
+                alacarte,
+                status: 'Pending',
+                createdAt: previousOrderData.createdAt,
+                kitchenNotes: previousOrderData.kitchenNotes || []
+            };
+            await db.collection('orders').doc(editOrderId).set(order);
+            showNotification('Order edited successfully!');
+            hideEditModeBar();
+        };
+        document.getElementById('edit-order-cancel-btn').onclick = function() {
+            hideEditModeBar();
+            showNotification('Edit cancelled, no changes applied.');
+        };
+
+        window.cancelOrder = function(orderId) {
+            if (editOrderMode && editOrderId === orderId) {
+                hideEditModeBar();
+                showNotification('Edit cancelled, no changes applied.');
+                return;
+            }
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return showNotification('Order not found!');
+            if (ord.status !== "Pending") return showNotification('Order hanya bisa dibatalkan saat status Pending!');
+            db.collection('orders').doc(orderId).delete();
+            showNotification('Order dibatalkan!');
+        };
+
+        function setDefaultDeliveryTime() {
+            const input = document.getElementById('delivery-time');
+            if (!input) return;
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            input.value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        }
+        document.addEventListener('DOMContentLoaded', setDefaultDeliveryTime);
+
+        document.getElementById('floating-send-to-kitchen-btn').onclick = function() {
+            if (editOrderMode) return;
+            showOrderSummaryModal();
+        };
+        function handleFloatingBtnVisibility() {
+            var btn = document.getElementById('floating-send-to-kitchen-btn');
+            var adminSectionActive = document.getElementById('admin-section').classList.contains('active');
+            if (adminSectionActive && !editOrderMode) {
+                btn.classList.remove('hide');
+            } else {
+                btn.classList.add('hide');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', handleFloatingBtnVisibility);
+
+        // ---- MODAL ORDER SUMMARY PATCH ----
+        function showOrderSummaryModal() {
+            const customer = document.getElementById('customer-name').value.trim();
+            const deliveryTimeInput = document.getElementById('delivery-time').value;
+            const deliveryLocation = document.getElementById('delivery-location').value.trim();
+            const notes = document.getElementById('order-notes').value.trim();
+            const now = dayjs().tz(DEFAULT_TZ);
+            const deliveryTime = dayjs.tz(`${now.format('YYYY-MM-DD')}T${deliveryTimeInput}`, DEFAULT_TZ).utc().toISOString();
+            const packages = [];
+            for (const mi of menuItems.filter(m=>m.type==='package')) {
+                const qty = Number(document.getElementById(`pkg_${mi.id}_qty`).value);
+                if (qty > 0) packages.push({menuId: mi.id, qty});
+            }
+            const alacarte = [];
+            for (const mi of menuItems.filter(m=>m.type==='alacarte')) {
+                const qty = Number(document.getElementById(`ac_${mi.id}_qty`).value);
+                if (qty > 0) alacarte.push({menuId: mi.id, qty});
+            }
+            if (!customer || !deliveryTimeInput || !deliveryLocation || (!packages.length && !alacarte.length)) {
+                showNotification('Please fill all required fields and select items.');
+                return;
+            }
+            let html = `<b>Customer:</b> ${customer}<br>`;
+            html += `<b>Delivery Location:</b> ${deliveryLocation}<br>`;
+            html += `<b>Delivery Time:</b> ${dayjs(deliveryTime).tz(DEFAULT_TZ).format('YYYY-MM-DD HH:mm')}<br>`;
+            if (packages.length > 0) {
                 html += `<b>Package:</b><ul class="detailed-list">`;
-                for (const pkg of ord.packages) {
+                for (const pkg of packages) {
                     const mi = menuItems.find(m => m.id === pkg.menuId);
                     if (mi) {
                         html += `<li><b>${mi.name} x${pkg.qty}</b>`;
@@ -1602,9 +1367,9 @@
                 }
                 html += `</ul>`;
             }
-            if (ord.alacarte && ord.alacarte.length) {
+            if (alacarte.length > 0) {
                 html += `<b>Ala Carte:</b><ul class="detailed-list">`;
-                for (const ac of ord.alacarte) {
+                for (const ac of alacarte) {
                     const mi = menuItems.find(m => m.id === ac.menuId);
                     if (mi) {
                         html += `<li>${mi.name} x${ac.qty}</li>`;
@@ -1612,35 +1377,125 @@
                 }
                 html += `</ul>`;
             }
-            return html;
-        }
+            html += `<b>Notes:</b> ${notes || '-'}`;
+            document.getElementById('modal-summary-details').innerHTML = html;
+            document.getElementById('modal-summary-total').innerHTML = `<span>Total Pembayaran: <b>¥${calcOrderTotal({packages,alacarte})}</b></span>`;
+            document.getElementById('order-summary-modal').style.display = 'flex';
 
-        function renderOrderHistory(ord) {
-            const logs = [];
-            if (ord.createdAt) logs.push(`Pending: ${formatDateTime(ord.createdAt)}`);
-            if (ord.cookingAt) logs.push(`Cooking: ${formatDateTime(ord.cookingAt)}`);
-            if (ord.readyAt) logs.push(`Ready: ${formatDateTime(ord.readyAt)}`);
-            if (ord.completedAt) logs.push(`Completed: ${formatDateTime(ord.completedAt)}`);
-            return logs.join('<br>');
+            window.__orderSummaryTemp = {customer,deliveryTime,deliveryLocation,notes,packages,alacarte};
         }
+        document.getElementById('modal-edit-btn').onclick = function() {
+            document.getElementById('order-summary-modal').style.display = 'none';
+        };
+        document.getElementById('modal-send-btn').onclick = async function() {
+            const temp = window.__orderSummaryTemp;
+            if (!temp) return;
+            const oid = `ORD_${Date.now().toString().slice(-8)}`;
+            const order = {
+                id: oid,
+                customer: temp.customer,
+                deliveryTime: temp.deliveryTime,
+                deliveryLocation: temp.deliveryLocation,
+                notes: temp.notes,
+                packages: temp.packages,
+                alacarte: temp.alacarte,
+                status: 'Pending',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                kitchenNotes: []
+            };
+            await db.collection('orders').doc(oid).set(order);
+            showNotification('Order sent to kitchen!');
+            document.getElementById('order-form').reset();
+            setDefaultDeliveryTime();
+            renderMenus();
+            document.getElementById('order-summary-modal').style.display = 'none';
+        };
+        document.getElementById('order-summary-modal').onclick = function(e) {
+            if (e.target === this) this.style.display = 'none';
+        };
 
-        function getOrderProgressPercent(status) {
-            switch(status) {
-                case "Pending": return 12;
-                case "Cooking": return 50;
-                case "Ready": return 80;
-                case "Completed": return 100;
-                default: return 0;
+        document.getElementById('order-form').onsubmit = function(e) {
+            e.preventDefault();
+            if (editOrderMode) return;
+            showOrderSummaryModal();
+        };
+
+        window.handleKitchenAction = async function(orderId, newStatus, btn) {
+            btn.classList.add('pop');
+            setTimeout(()=>btn.classList.remove('pop'), 370);
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return;
+            let updateObj = { status: newStatus };
+            updateObj[`${newStatus.toLowerCase()}At`] = firebase.firestore.FieldValue.serverTimestamp();
+            if (newStatus === 'Completed') {
+                updateObj.completedAt = firebase.firestore.FieldValue.serverTimestamp();
             }
-        }
+            await db.collection('orders').doc(orderId).update(updateObj);
+            showNotification(`Order ${orderId} status updated to ${newStatus}`);
+            if (newStatus === "Ready") {
+                sendTelegram(orderId);
+            }
+        };
 
+        document.getElementById('export-excel-btn').onclick = function() {
+            let start = document.getElementById('report-start').value;
+            let end = document.getElementById('report-end').value;
+            let type = document.getElementById('report-type').value;
+            let filtered = orders.filter(ord => {
+                let t = ord.createdAt && ord.createdAt.seconds ? dayjs.unix(ord.createdAt.seconds).tz(DEFAULT_TZ).toDate() : new Date(ord.createdAt);
+                let s = start ? new Date(start) : null;
+                let e = end ? new Date(end) : null;
+                return (!s || t >= s) && (!e || t <= e);
+            });
+            let data = filtered.map(ord => ({
+                "Order ID": ord.id,
+                "Date": formatDateTime(ord.createdAt),
+                "Customer": ord.customer,
+                "Order Details": 
+                    "Package: " + ord.packages.map(p => {
+                        const mi = menuItems.find(m => m.id === p.menuId); 
+                        return mi ? `${mi.name} x${p.qty}` : '';
+                    }).join(', ') +
+                    "; Ala Carte: " + ord.alacarte.map(a => {
+                        const mi = menuItems.find(m => m.id === a.menuId);
+                        return mi ? `${mi.name} x${a.qty}` : '';
+                    }).join(', '),
+                "Status": ord.status,
+                "Delivery Time": formatDateTime(ord.deliveryTime),
+                "Timestamp Pending": formatDateTime(ord.createdAt),
+                "Timestamp Cooking": formatDateTime(ord.cookingAt),
+                "Timestamp Ready": formatDateTime(ord.readyAt),
+                "Timestamp Completed": formatDateTime(ord.completedAt)
+            }));
+            let ws = XLSX.utils.json_to_sheet(data);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Orders");
+            let filename = autoFileNameReport(type, start, end);
+            XLSX.writeFile(wb, filename);
+            showNotification('Excel report exported!');
+        };
+
+        function generateInvoice(orderId) {
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return;
+            const total = calcOrderTotal(ord);
+            const invoiceId = `INV_${orderId}`;
+            const invoice = {
+                invoiceId,
+                orderId,
+                customer: ord.customer,
+                totalPrice: total,
+                completedTime: ord.completedAt || new Date(),
+                details: {
+                    packages: ord.packages,
+                    alacarte: ord.alacarte
+                }
+            };
+            invoices.unshift(invoice);
+            renderInvoicesTable();
+        }
         function renderInvoicesTable() {
-            const table = document.getElementById('invoices-table');
-            if (!table || !invoices) return;
-            
-            const tb = table.getElementsByTagName('tbody')[0];
-            if (!tb) return;
-            
+            const tb = document.getElementById('invoices-table').getElementsByTagName('tbody')[0];
             tb.innerHTML = '';
             for (const inv of invoices) {
                 tb.innerHTML += `<tr>
@@ -1655,160 +1510,12 @@
                 </tr>`;
             }
         }
-
-        // Edit Order Functions
-        function handleFloatingBtnVisibility() {
-            const btn = document.getElementById('floating-send-to-kitchen-btn');
-            const adminSectionActive = document.getElementById('admin-section').classList.contains('active');
-            if (adminSectionActive && !editOrderMode) {
-                btn.classList.remove('hide');
-            } else {
-                btn.classList.add('hide');
-            }
-        }
-
-        window.editOrder = function(orderId) {
-            showNotification('Edit order feature will be implemented', 2000, 'info');
-        };
-
-        window.cancelOrder = function(orderId) {
-            if (confirm('Are you sure you want to cancel this order?')) {
-                db.collection('orders').doc(orderId).delete();
-                showNotification('Order cancelled!', 2000, 'success');
-            }
-        };
-
-        // Kitchen Action Functions
-        window.handleKitchenAction = async function(orderId, newStatus, btn) {
-            btn.classList.add('pop');
-            setTimeout(()=>btn.classList.remove('pop'), 370);
-            
-            let updateObj = { status: newStatus };
-            updateObj[`${newStatus.toLowerCase()}At`] = firebase.firestore.FieldValue.serverTimestamp();
-            
-            if (newStatus === 'Completed') {
-                updateObj.completedAt = firebase.firestore.FieldValue.serverTimestamp();
-                generateInvoice(orderId);
-            }
-            
-            await db.collection('orders').doc(orderId).update(updateObj);
-            showNotification(`Order ${orderId} status updated to ${newStatus}`, 2000, 'success');
-        };
-
-        // Modal Functions
-        function showOrderSummaryModal() {
-            const customer = document.getElementById('customer-name').value.trim();
-            const deliveryTimeInput = document.getElementById('delivery-time').value;
-            const deliveryLocation = document.getElementById('delivery-location').value.trim();
-            const notes = document.getElementById('order-notes').value.trim();
-            
-            if (!customer || !deliveryTimeInput || !deliveryLocation) {
-                showNotification('Please fill all required fields.', 2500, 'error');
-                return;
-            }
-            
-            const now = dayjs().tz(DEFAULT_TZ);
-            const deliveryTime = dayjs.tz(`${now.format('YYYY-MM-DD')}T${deliveryTimeInput}`, DEFAULT_TZ).utc().toISOString();
-            
-            const packages = [];
-            const alacarte = [];
-            
-            for (const mi of menuItems.filter(m => m.type === 'package')) {
-                const qtyElement = document.getElementById(`pkg_${mi.id}_qty`);
-                if (qtyElement) {
-                    const qty = Number(qtyElement.value);
-                    if (qty > 0) packages.push({menuId: mi.id, qty});
-                }
-            }
-            
-            for (const mi of menuItems.filter(m => m.type === 'alacarte')) {
-                const qtyElement = document.getElementById(`ac_${mi.id}_qty`);
-                if (qtyElement) {
-                    const qty = Number(qtyElement.value);
-                    if (qty > 0) alacarte.push({menuId: mi.id, qty});
-                }
-            }
-            
-            if (!packages.length && !alacarte.length) {
-                showNotification('Please select at least one item.', 2500, 'error');
-                return;
-            }
-            
-            let html = `<b>Customer:</b> ${customer}<br>`;
-            html += `<b>Delivery Location:</b> ${deliveryLocation}<br>`;
-            html += `<b>Delivery Time:</b> ${dayjs(deliveryTime).tz(DEFAULT_TZ).format('YYYY-MM-DD HH:mm')}<br>`;
-            document.getElementById('modal-summary-details').innerHTML = html;
-            
-            let itemList = '';
-            if (packages.length > 0) {
-                itemList += `<li><b>Packages:</b><ul>`;
-                for (const pkg of packages) {
-                    const mi = menuItems.find(m => m.id === pkg.menuId);
-                    if (mi) {
-                        itemList += `<li><b>${mi.name}</b> x${pkg.qty} (¥${mi.price * pkg.qty})`;
-                        if (menuDetails[mi.name]) {
-                            itemList += `<ul>${menuDetails[mi.name].map(i=>`<li>${i}</li>`).join('')}</ul>`;
-                        }
-                        itemList += `</li>`;
-                    }
-                }
-                itemList += `</ul></li>`;
-            }
-            
-            if (alacarte.length > 0) {
-                itemList += `<li><b>Ala Carte:</b><ul>`;
-                for (const ac of alacarte) {
-                    const mi = menuItems.find(m => m.id === ac.menuId);
-                    if (mi) {
-                        itemList += `<li>${mi.name} x${ac.qty} (¥${mi.price * ac.qty})</li>`;
-                    }
-                }
-                itemList += `</ul></li>`;
-            }
-            
-            if (notes) {
-                itemList += `<li><b>Notes:</b> ${notes}</li>`;
-            }
-            
-            document.getElementById('modal-summary-items').innerHTML = itemList;
-            document.getElementById('modal-summary-total').innerHTML = `<span>Total Pembayaran: <b>¥${calcOrderTotal({packages,alacarte})}</b></span>`;
-            document.getElementById('order-summary-modal').style.display = 'flex';
-
-            window.__orderSummaryTemp = {customer,deliveryTime,deliveryLocation,notes,packages,alacarte};
-        }
-
-        // Invoice Functions
-        function generateInvoice(orderId) {
-            const ord = orders.find(o => o.id === orderId);
-            if (!ord) return;
-            
-            const total = calcOrderTotal(ord);
-            const invoiceId = `INV_${orderId}`;
-            const invoice = {
-                invoiceId,
-                orderId,
-                customer: ord.customer,
-                totalPrice: total,
-                completedTime: new Date(),
-                details: {
-                    packages: ord.packages,
-                    alacarte: ord.alacarte
-                }
-            };
-            
-            db.collection('invoices').doc(invoiceId).set(invoice);
-            invoices.unshift(invoice);
-            renderInvoicesTable();
-        }
-
         window.downloadInvoicePdf = function(orderId) {
             const ord = orders.find(o => o.id === orderId);
-            if (!ord) return showNotification('Order not found!', 2500, 'error');
-            
+            if (!ord) return showNotification('Order not found!');
             const total = calcOrderTotal(ord);
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
             doc.setFont('helvetica','bold');
             doc.setFontSize(18);
             doc.text('CRI Catering Invoice', 20, 20);
@@ -1820,15 +1527,12 @@
             doc.text(`Delivery Time: ${formatDateTime(ord.deliveryTime)}`, 20, 54);
             doc.text(`Completed: ${formatDateTime(ord.completedAt)}`, 20, 62);
             doc.text('Order Details:', 20, 70);
-            
             let y = 78;
-            for (const pkg of ord.packages || []) {
+            for (const pkg of ord.packages) {
                 const mi = menuItems.find(m => m.id === pkg.menuId);
                 if (mi) {
-                    doc.setFont('helvetica','bold');
-                    doc.text(`Package: ${mi.name} x${pkg.qty} @¥${mi.price} = ¥${mi.price*pkg.qty}`, 25, y);
+                    doc.text(`Package: ${mi.name} x${pkg.qty} @¥${mi.price}`, 25, y);
                     y += 8;
-                    doc.setFont('helvetica','normal');
                     if (menuDetails[mi.name]) {
                         for (const detail of menuDetails[mi.name]) {
                             doc.text(`- ${detail}`, 30, y);
@@ -1837,225 +1541,87 @@
                     }
                 }
             }
-            
-            for (const ac of ord.alacarte || []) {
+            for (const ac of ord.alacarte) {
                 const mi = menuItems.find(m => m.id === ac.menuId);
                 if (mi) {
-                    doc.setFont('helvetica','bold');
-                    doc.text(`Ala Carte: ${mi.name} x${ac.qty} @¥${mi.price} = ¥${mi.price*ac.qty}`, 25, y);
+                    doc.text(`Ala Carte: ${mi.name} x${ac.qty} @¥${mi.price}`, 25, y);
                     y += 8;
                 }
             }
-            
-            doc.setFont('helvetica','bold');
             doc.text(`Total Price: ¥${total}`, 20, y+5);
             doc.save(`invoice_${orderId}.pdf`);
-            showNotification('Invoice downloaded!', 2000, 'success');
+            showNotification('Invoice downloaded!');
         };
 
-        // Event Listeners Setup
-        function setupEventListeners() {
-            // Sidebar navigation
-            sidebarToggleBtn.addEventListener('click', toggleSidebar);
-            sidebarOverlay.addEventListener('click', closeSidebar);
-
-            // Navigation links - Fixed event listeners
-            document.getElementById('nav-admin').addEventListener('click', function() {
-                console.log('Admin nav clicked');
-                setSidebarActive('nav-admin');
-                showSection('admin-section');
-                if (window.innerWidth <= 600) closeSidebar();
-            });
-
-            document.getElementById('nav-kitchen').addEventListener('click', function() {
-                console.log('Kitchen nav clicked');
-                setSidebarActive('nav-kitchen');
-                showSection('kitchen-section');
-                if (window.innerWidth <= 600) closeSidebar();
-            });
-
-            document.getElementById('nav-reports').addEventListener('click', function() {
-                console.log('Reports nav clicked');
-                setSidebarActive('nav-reports');
-                showSection('reports-section');
-                if (window.innerWidth <= 600) closeSidebar();
-            });
-
-            document.getElementById('nav-menu').addEventListener('click', function() {
-                console.log('Menu nav clicked');
-                setSidebarActive('nav-menu');
-                showSection('menu-section');
-                if (window.innerWidth <= 600) closeSidebar();
-            });
-
-            // Form submissions
-            document.getElementById('order-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                showOrderSummaryModal();
-            });
-
-            document.getElementById('menu-form').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const type = document.getElementById('menu-type').value;
-                const name = document.getElementById('menu-name').value.trim();
-                const desc = document.getElementById('menu-desc').value.trim();
-                const price = Number(document.getElementById('menu-price').value);
-                
-                if (!name || isNaN(price) || price <= 0) {
-                    return showNotification('Invalid menu item!', 2500, 'error');
+        function sendTelegram(orderId) {
+            if (telegramSentIds.has(orderId)) return;
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return;
+            let msg = '👋🏻 Siap Diantar 👋🏻\n\n';
+            msg += `Orderan #${ord.id}\n\n`;
+            msg += `Nama Customer: ${ord.customer}\nLocation: ${ord.deliveryLocation}\nDelivery Time: ${formatDateTime(ord.deliveryTime)}\n\n`;
+            msg += `Order:\n`;
+            for (const pkg of ord.packages) {
+                const mi = menuItems.find(m => m.id === pkg.menuId);
+                if (mi) {
+                    msg += `- ${mi.name} x${pkg.qty}\n`;
+                    if (menuDetails[mi.name]) {
+                        for (const detail of menuDetails[mi.name]) {
+                            msg += `   • ${detail}\n`;
+                        }
+                    }
                 }
-                
-                const id = `${type}_${name.replace(/\s+/g,'_').toLowerCase()}_${Date.now()}`;
-                await db.collection('menu').doc(id).set({id, type, name, desc, price});
-                showNotification('Menu item added!', 2000, 'success');
-                document.getElementById('menu-form').reset();
-            });
-
-            document.getElementById('menu-edit-form').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                if (!menuEditId) return showNotification('No menu selected!', 2500, 'error');
-                
-                const type = document.getElementById('edit-menu-type').value;
-                const name = document.getElementById('edit-menu-name').value.trim();
-                const desc = document.getElementById('edit-menu-desc').value.trim();
-                const price = Number(document.getElementById('edit-menu-price').value);
-                
-                if (!name || isNaN(price) || price <= 0) {
-                    return showNotification('Invalid menu item!', 2500, 'error');
-                }
-                
-                await db.collection('menu').doc(menuEditId).update({type, name, desc, price});
-                showNotification('Menu item edited!', 2000, 'success');
-                document.getElementById('menu-edit-modal').style.display = 'none';
-                menuEditId = null;
-            });
-
-            // Button clicks
-            document.getElementById('floating-send-to-kitchen-btn').addEventListener('click', function() {
-                showOrderSummaryModal();
-            });
-
-            document.getElementById('modal-edit-btn').addEventListener('click', function() {
-                document.getElementById('order-summary-modal').style.display = 'none';
-            });
-
-            document.getElementById('modal-send-btn').addEventListener('click', async function() {
-                const temp = window.__orderSummaryTemp;
-                if (!temp) return;
-                
-                const oid = `ORD_${Date.now().toString().slice(-8)}`;
-                const order = {
-                    id: oid,
-                    customer: temp.customer,
-                    deliveryTime: temp.deliveryTime,
-                    deliveryLocation: temp.deliveryLocation,
-                    notes: temp.notes,
-                    packages: temp.packages,
-                    alacarte: temp.alacarte,
-                    status: 'Pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                await db.collection('orders').doc(oid).set(order);
-                showNotification('Order sent to kitchen!', 2000, 'success');
-                document.getElementById('order-form').reset();
-                setDefaultDeliveryTime();
-                renderMenus();
-                document.getElementById('order-summary-modal').style.display = 'none';
-            });
-
-            document.getElementById('order-summary-modal').addEventListener('click', function(e) {
-                if (e.target === this) this.style.display = 'none';
-            });
-
-            document.getElementById('menu-edit-cancel-btn').addEventListener('click', function() {
-                document.getElementById('menu-edit-modal').style.display = 'none';
-                menuEditId = null;
-            });
-
-            // Responsive handling
-            window.addEventListener('resize', () => {
-                if (window.innerWidth > 600) {
-                    sidebar.classList.remove('collapsed');
-                    sidebarOverlay.classList.add('hide');
-                    document.body.classList.remove('menu-active');
-                    sidebarOpen = false;
-                } else if (!sidebarOpen) {
-                    sidebar.classList.add('collapsed');
-                    sidebarOverlay.classList.add('hide');
-                    document.body.classList.remove('menu-active');
-                }
-            });
-        }
-
-        // Firebase Listeners Setup
-        function setupFirebaseListeners() {
-            // Initialize default menu details
-            menuDetails = {
-                "Paket Nasi Kuning": ["Nasi Kuning", "Ayam Goreng", "Sambal", "Kerupuk", "Lalapan"],
-                "Paket Nasi Putih": ["Nasi Putih", "Rendang", "Sayur", "Kerupuk", "Sambal"],
-                "Paket Gudeg": ["Nasi Putih", "Gudeg", "Opor Ayam", "Sambal Krecek", "Kerupuk"]
-            };
-
-            db.collection('menu').onSnapshot(snap => {
-                menuItems = snap.docs.map(doc => doc.data());
-                console.log('Menu items loaded:', menuItems.length);
-                renderMenus();
-                renderMenuTable();
-            });
-
-            db.collection('orders').onSnapshot(snap => {
-                orders = snap.docs.map(doc => doc.data());
-                console.log('Orders loaded:', orders.length);
-                renderAdminOrders();
-                renderKitchenOrders();
-            });
-
-            db.collection('invoices').onSnapshot(snap => {
-                invoices = snap.docs.map(doc => doc.data());
-                console.log('Invoices loaded:', invoices.length);
-                renderInvoicesTable();
-            });
-        }
-
-        // Initialize Application
-        function initializeApp() {
-            console.log('Initializing CRI Catering Dashboard...');
-            
-            // Setup event listeners
-            setupEventListeners();
-            
-            // Setup Firebase listeners
-            setupFirebaseListeners();
-            
-            // Set default delivery time
-            setDefaultDeliveryTime();
-            
-            // Handle initial sidebar state
-            if (window.innerWidth <= 600) {
-                sidebar.classList.add('collapsed');
-                sidebarOverlay.classList.add('hide');
-                document.body.classList.remove('menu-active');
-                sidebarOpen = false;
             }
-            
-            // Handle floating button visibility
-            handleFloatingBtnVisibility();
-            
-            console.log('Dashboard initialized successfully!');
+            for (const ac of ord.alacarte) {
+                const mi = menuItems.find(m => m.id === ac.menuId);
+                if (mi) {
+                    msg += `- ${mi.name} x${ac.qty}\n`;
+                }
+            }
+            msg += `Notes: ${ord.notes || '-'}\n\n`;
+            msg += `Total: ¥${calcOrderTotal(ord)}\n`;
+            const botToken = "7977280306:AAFG8qAVnSD81p73iFP3wRceOP-605auqQ0";
+            const chatId = "-1002880911209";
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `chat_id=${encodeURIComponent(chatId)}&text=${encodeURIComponent(msg)}`
+            }).then(r=>r.json()).then(data=>{
+                if (data.ok) {
+                    telegramSentIds.add(orderId);
+                    showNotification('Pesan Telegram sukses!');
+                } else {
+                    showNotification('Gagal kirim Telegram: ' + JSON.stringify(data));
+                }
+            }).catch(e=>{
+                showNotification('Gagal kirim Telegram: ' + e.message);
+            });
         }
 
-        // Make functions globally available
-        window.toggleMenuPanel = toggleMenuPanel;
-        window.renderAdminOrders = renderAdminOrders;
-        window.renderKitchenOrders = renderKitchenOrders;
-
-        // Initialize when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, starting initialization...');
-            initializeApp();
+        db.collection('menu').onSnapshot(snap => {
+            menuItems = snap.docs.map(doc => doc.data());
+            renderMenus();
+            renderMenuTable();
+        });
+        db.collection('orders').onSnapshot(snap => {
+            orders = snap.docs.map(doc => doc.data());
+            renderAdminOrders();
+            renderKitchenOrders();
+        });
+        db.collection('invoices').onSnapshot(snap => {
+            invoices = snap.docs.map(doc => doc.data());
+            renderInvoicesTable();
         });
 
+        function initialLoad() {
+            renderMenus();
+            renderMenuTable();
+            renderAdminOrders();
+            renderKitchenOrders();
+            renderInvoicesTable();
+            handleFloatingBtnVisibility();
+        }
+        initialLoad();
     </script>
 </body>
 </html>
