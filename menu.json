@@ -1,0 +1,233 @@
+[
+  {
+    "id": "pkg_payalur_bakwan",
+    "type": "package",
+    "name": "PAYALUR BAKWAN",
+    "desc": "Nasi Putih dan Ayam Goreng, Telur Balado, Bakwan Sayur, Sayur dan Sambal",
+    "details": [
+      "Nasi Putih dan Ayam Goreng",
+      "Telur Balado",
+      "Bakwan Sayur",
+      "Sayur dan Sambal"
+    ],
+    "price": 35
+  },
+  {
+    "id": "pkg_payalur_kentang",
+    "type": "package",
+    "name": "PAYALUR KENTANG",
+    "desc": "Nasi Putih dan Ayam Goreng, Telur Balado, Kentang Balado, Sayur dan Sambal",
+    "details": [
+      "Nasi Putih dan Ayam Goreng",
+      "Telur Balado",
+      "Kentang Balado",
+      "Sayur dan Sambal"
+    ],
+    "price": 35
+  },
+  {
+    "id": "pkg_payalit_bakwan",
+    "type": "package",
+    "name": "PAYALIT BAKWAN",
+    "desc": "Nasi Putih dan Ayam Goreng, Bakwan Sayur, Sayur dan Sambal",
+    "details": [
+      "Nasi Putih dan Ayam Goreng",
+      "Bakwan Sayur",
+      "Sayur dan Sambal"
+    ],
+    "price": 30
+  },
+  {
+    "id": "pkg_payalit_telur",
+    "type": "package",
+    "name": "PAYALIT TELUR",
+    "desc": "Nasi Putih dan Ayam Goreng, Telur Balado, Sayur dan Sambal",
+    "details": [
+      "Nasi Putih dan Ayam Goreng",
+      "Telur Balado",
+      "Sayur dan Sambal"
+    ],
+    "price": 30
+  },
+  {
+    "id": "pkg_payamat",
+    "type": "package",
+    "name": "PAYAMAT",
+    "desc": "Nasi Putih dan Ayam Goreng, Sayur dan Sambal",
+    "details": [
+      "Nasi Putih dan Ayam Goreng",
+      "Sayur dan Sambal"
+    ],
+    "price": 25
+  },
+  {
+    "id": "pkg_palutang",
+    "type": "package",
+    "name": "PALUTANG",
+    "desc": "Nasi Putih dan Telur Balado, Kentang Balado, Bakwan Sayur, Sayur",
+    "details": [
+      "Nasi Putih dan Telur Balado",
+      "Kentang Balado",
+      "Bakwan Sayur",
+      "Sayur"
+    ],
+    "price": 25
+  },
+  {
+    "id": "pkg_palur",
+    "type": "package",
+    "name": "PALUR",
+    "desc": "Nasi Putih dan Telur Balado, Bakwan Sayur, Sayur",
+    "details": [
+      "Nasi Putih dan Telur Balado",
+      "Bakwan Sayur",
+      "Sayur"
+    ],
+    "price": 20
+  },
+  {
+    "id": "pkg_prames_a",
+    "type": "package",
+    "name": "PRAMES A",
+    "desc": "Nasi Putih, Ayam Goreng, Tahu, Timun, Sambal, Kremesan",
+    "details": [
+      "Nasi Putih",
+      "Ayam Goreng",
+      "Tahu",
+      "Timun",
+      "Sambal",
+      "Kremesan"
+    ],
+    "price": 25
+  },
+  {
+    "id": "pkg_prames_b",
+    "type": "package",
+    "name": "PRAMES B",
+    "desc": "Nasi Putih, Ayam Goreng, Telur Balado, Tahu, Timun, Sambal, Kremesan",
+    "details": [
+      "Nasi Putih",
+      "Ayam Goreng",
+      "Telur Balado",
+      "Tahu",
+      "Timun",
+      "Sambal",
+      "Kremesan"
+    ],
+    "price": 33
+  },
+  {
+    "id": "pkg_prames_c",
+    "type": "package",
+    "name": "PRAMES C",
+    "desc": "Nasi Putih, Ayam Goreng, Kentang Balado, Tahu, Timun, Sambal, Kremesan",
+    "details": [
+      "Nasi Putih",
+      "Ayam Goreng",
+      "Kentang Balado",
+      "Tahu",
+      "Timun",
+      "Sambal",
+      "Kremesan"
+    ],
+    "price": 30
+  },
+  {
+    "id": "pkg_prames_karbo",
+    "type": "package",
+    "name": "PRAMES KARBO",
+    "desc": "Nasi Putih, Kentang Balado, Bakwan 2pcs, Sambal, Kremesan",
+    "details": [
+      "Nasi Putih",
+      "Kentang Balado",
+      "Bakwan 2pcs",
+      "Sambal",
+      "Kremesan"
+    ],
+    "price": 20
+  },
+  {
+    "id": "pkg_prames_veggie",
+    "type": "package",
+    "name": "PRAMES VEGGIE",
+    "desc": "Nasi Putih, Tahu, Timun, Sambal, Kremesan",
+    "details": [
+      "Nasi Putih",
+      "Tahu",
+      "Timun",
+      "Sambal",
+      "Kremesan"
+    ],
+    "price": 15
+  },
+  {
+    "id": "ac_ayam_goreng",
+    "type": "alacarte",
+    "name": "Ayam Goreng",
+    "desc": "",
+    "price": 15
+  },
+  {
+    "id": "ac_telur_dadar",
+    "type": "alacarte",
+    "name": "Telur Dadar",
+    "desc": "",
+    "price": 8
+  },
+  {
+    "id": "ac_kentang_balado",
+    "type": "alacarte",
+    "name": "Kentang Balado",
+    "desc": "",
+    "price": 10
+  },
+  {
+    "id": "ac_telur_balado",
+    "type": "alacarte",
+    "name": "Telur Balado",
+    "desc": "",
+    "price": 10
+  },
+  {
+    "id": "ac_tahu",
+    "type": "alacarte",
+    "name": "Tahu",
+    "desc": "",
+    "price": 10
+  },
+  {
+    "id": "ac_telur_ceplok",
+    "type": "alacarte",
+    "name": "Telur Ceplok",
+    "desc": "",
+    "price": 7
+  },
+  {
+    "id": "ac_bakwan_3pcs",
+    "type": "alacarte",
+    "name": "Bakwan 3pcs",
+    "desc": "",
+    "price": 5
+  },
+  {
+    "id": "ac_extra_kremes",
+    "type": "alacarte",
+    "name": "Extra Kremes",
+    "desc": "",
+    "price": 5
+  },
+  {
+    "id": "ac_extra_sayur",
+    "type": "alacarte",
+    "name": "Extra Sayur",
+    "desc": "",
+    "price": 5
+  },
+  {
+    "id": "ac_extra_sambel",
+    "type": "alacarte",
+    "name": "Extra Sambel",
+    "desc": "",
+    "price": 3
+  }
+]
