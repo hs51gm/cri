@@ -265,13 +265,6 @@
             /* align-items: center; */
         }
         
-        .menu-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.2rem;
-            width: 100%;
-        }
-        
         .section-title {
             width: 100%;
             text-align: center; /* teks judul di tengah */
@@ -282,6 +275,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.2rem;
+            width: 100%;
         }
         .menu-item {
             background: var(--secondary);
@@ -584,11 +578,11 @@
                 </div>
                 <div class="menu-section">
                     <div class="section-title" onclick="toggleMenuSection('packages')" style="cursor:pointer"><i class="fas fa-list"></i> MENU PAKET <span id="package-toggle-icon">[ + ]</span></div>
-                    <div class="menu-list collapse" id="package-menu-list"></div>
+                    <div class="menu-list" id="package-menu-list"></div><br>
                 </div>
                 <div class="menu-section">
                     <div class="section-title" onclick="toggleMenuSection('alacarte')" style="cursor:pointer"><i class="fas fa-list"></i> MENU SATUAN <span id="alacarte-toggle-icon">[ + ]</span></div>
-                    <div class="menu-list collapse" id="alacarte-menu-list"></div>
+                    <div class="menu-list" id="alacarte-menu-list"></div>
                 </div>
                 <div class="form-group">
                     <label for="order-notes">CATATAN TAMBAHAN</label>
@@ -813,11 +807,11 @@
             {id:"package_prames_b", type:"package", name:"PRAMES B", desc:"Nasi Putih + Ayam Goreng + Telur Balado + Tahu + Timun + Sambal + Kremesan", price:33},
             {id:"package_prames_c", type:"package", name:"PRAMES C", desc:"Nasi Putih + Ayam Goreng + Kentang Balado + Tahu + Timun + Sambal + Kremesan", price:30},
             {id:"package_prames_veggie", type:"package", name:"PRAMES VEGGIE", desc:"Nasi Putih + Tahu + Timun + Sambal + Kremesan", price:15},
-            {id:"alacarte_ayam_goreng", type:"alacarte", name:"Ayam Goreng", desc:"Ala Carte", price:15},
-            {id:"alacarte_telur_balado", type:"alacarte", name:"Telur Balado", desc:"Ala Carte", price:10},
-            {id:"alacarte_bakwan_sayur", type:"alacarte", name:"Bakwan Sayur", desc:"Ala Carte", price:5},
-            {id:"alacarte_kentang_balado", type:"alacarte", name:"Kentang Balado", desc:"Ala Carte", price:10},
-            {id:"alacarte_tahu", type:"alacarte", name:"Tahu", desc:"Ala Carte", price:5},
+            {id:"alacarte_ayam_goreng", type:"alacarte", name:"Ayam Goreng", desc:"-", price:15},
+            {id:"alacarte_telur_balado", type:"alacarte", name:"Telur Balado", desc:"-", price:10},
+            {id:"alacarte_bakwan_sayur", type:"alacarte", name:"Bakwan Sayur", desc:"-", price:5},
+            {id:"alacarte_kentang_balado", type:"alacarte", name:"Kentang Balado", desc:"-", price:10},
+            {id:"alacarte_tahu", type:"alacarte", name:"Tahu", desc:"-", price:5},
         ];
         const menuDetails = {
             'PAYALUR BAKWAN': [
