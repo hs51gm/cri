@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CRI Catering - Order Dashboard</title>
+    <title>CRI - Order Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -260,11 +260,20 @@
             display: none;
         }
         .menu-section {
-            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* semua isi di tengah */
+        }
+        
+        .section-title {
+            width: 100%;
+            text-align: center; /* teks judul di tengah */
+            justify-content: center; /* kalau flex, judul di tengah */
+            margin-bottom: 0.8rem;
         }
         .menu-list {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.2rem;
         }
         .menu-item {
@@ -410,6 +419,8 @@
             .footer { font-size: 0.85rem; padding: 0.7rem 0.2rem; }
             th, td { font-size: 0.85rem; }
         }
+        .collapse { display: none; }
+        .show { display: block; }
         .section { display: none; }
         .section.active { display: block; }
         .order-history-log {
@@ -517,7 +528,7 @@
 <body>
     <header>
         <div class="logo-title">
-            <h1>CRI Catering Admin</h1>
+            <h1>CRI Admin</h1>
         </div>
         <nav>
             <button id="nav-admin" class="nav-btn active"><i class="fas fa-user-cog"></i> Admin Dashboard</button>
@@ -565,12 +576,12 @@
                     </div>
                 </div>
                 <div class="menu-section">
-                    <div class="section-title"><i class="fas fa-list"></i> Packages</div>
-                    <div class="menu-list" id="package-menu-list"></div>
+                    <div class="section-title" onclick="toggleMenuSection('packages')" style="cursor:pointer"><i class="fas fa-list"></i> Packages <span id="package-toggle-icon">[ + ]</span></div>
+                    <div class="menu-list collapse" id="package-menu-list"></div>
                 </div>
                 <div class="menu-section">
-                    <div class="section-title"><i class="fas fa-list"></i> Ala Carte</div>
-                    <div class="menu-list" id="alacarte-menu-list"></div>
+                    <div class="section-title" onclick="toggleMenuSection('alacarte')" style="cursor:pointer"><i class="fas fa-list"></i> Ala Carte <span id="alacarte-toggle-icon">[ + ]</span></div>
+                    <div class="menu-list collapse" id="alacarte-menu-list"></div>
                 </div>
                 <div class="form-group">
                     <label for="order-notes">Additional Notes / Instructions (optional)</label>
@@ -760,7 +771,6 @@
         </section>
     </main>
     <footer class="footer">
-        &copy; 2025 CRI | <a href="https://t.me/CriFood" target="_blank" style="color: #ff6d1a;">Telegram Channel</a>
         <div class="footer-buttons">
             <button id="footer-reports" class="footer-btn"><i class="fas fa-file-excel"></i> Reports & Export</button>
             <button id="footer-menu" class="footer-btn"><i class="fas fa-book"></i> Menu Management</button>
@@ -1012,7 +1022,7 @@
             for (const mi of menuItems.filter(m => m.type === 'package')) {
                 pkgList.innerHTML += `
                     <div class="menu-item">
-                        <div class="menu-item-title">${mi.name}</div>
+                        <div class="menu-item-title" onclick="toggleMenuDetails('${mi.id}')" style="cursor:pointer">${mi.name}</div>
                         <div class="menu-item-price">¥${mi.price}</div>
                         <ul class="detailed-list">
                             ${menuDetails[mi.name] ? menuDetails[mi.name].map(i => `<li>${i}</li>`).join('') : ''}
@@ -1029,7 +1039,7 @@
             for (const mi of menuItems.filter(m => m.type === 'alacarte')) {
                 acList.innerHTML += `
                     <div class="menu-item">
-                        <div class="menu-item-title">${mi.name}</div>
+                        <div class="menu-item-title" onclick="toggleMenuDetails('${mi.id}')" style="cursor:pointer">${mi.name}</div>
                         <div class="menu-item-price">¥${mi.price}</div>
                         <div class="menu-item-desc">${mi.desc}</div>
                         <div class="menu-item-select">
@@ -1060,6 +1070,26 @@
         window.removeMenuItem = async function(id) {
             await db.collection('menu').doc(id).delete();
             showNotification('Menu item removed!');
+        };
+        window.toggleMenuDetails = function(id) {
+            const el = document.getElementById('menu-details-' + id);
+            el.classList.toggle('collapse');
+            el.classList.toggle('show');
+        };
+        window.toggleMenuSection = function(section) {
+            let listId = section === 'packages' ? 'package-menu-list' : 'alacarte-menu-list';
+            let iconId = section === 'packages' ? 'package-toggle-icon' : 'alacarte-toggle-icon';
+            const el = document.getElementById(listId);
+            const icon = document.getElementById(iconId);
+            if (el.classList.contains('collapse')) {
+                el.classList.remove('collapse');
+                el.classList.add('show');
+                icon.textContent = '[ - ]';
+            } else {
+                el.classList.add('collapse');
+                el.classList.remove('show');
+                icon.textContent = '[ + ]';
+            }
         };
         document.getElementById('menu-form').onsubmit = async function(e) {
             e.preventDefault();
@@ -1098,10 +1128,12 @@
         function kitchenOrderCardHtml(ord, showInvoice) {
             return `
             <div class="kitchen-order-card">
-                <div><b>Order ID:</b> ${ord.id}</div>
                 <div><b>Customer:</b> ${ord.customer}</div>
                 <div><b>Details:</b> ${renderOrderDetailsKitchen(ord)}</div>
+                <div><b>Notes:</b> ${ord.notes || '-'}</div>
                 <div><b>Delivery:</b> ${formatDateTime(ord.deliveryTime)}</div>
+                <div><b>Delivery Location:</b> ${ord.deliveryLocation}</div>
+                <div><b>Order ID:</b> ${ord.id}</div>
                 <div><b>Status:</b> ${formatStatus(ord.status)}</div>
                 <div class="kitchen-order-actions">
                     ${ord.status === 'Pending' ? `<button class="action-btn" onclick="handleKitchenAction('${ord.id}','Cooking', this)">Start Cooking</button>` : ''}
@@ -1518,7 +1550,7 @@
             const doc = new jsPDF();
             doc.setFont('helvetica','bold');
             doc.setFontSize(18);
-            doc.text('CRI Catering Invoice', 20, 20);
+            doc.text('CRI Invoice', 20, 20);
             doc.setFontSize(12);
             doc.setFont('helvetica','normal');
             doc.text(`Invoice ID: INV_${orderId}`, 20, 30);
