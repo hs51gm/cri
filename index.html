@@ -1386,11 +1386,11 @@
                 showNotification('Please fill all required fields and select items.');
                 return;
             }
-            let html = `<b>Customer:</b> ${customer}<br>`;
-            html += `<b>Delivery Location:</b> ${deliveryLocation}<br>`;
-            html += `<b>Delivery Time:</b> ${dayjs(deliveryTime).tz(DEFAULT_TZ).format('YYYY-MM-DD HH:mm')}<br>`;
+            let html = `<b>NAMA:</b> ${customer}<br>`;
+            html += `<b>ALAMAT:</b> ${deliveryLocation}<br>`;
+            html += `<b>WAKTU ANTAR:</b> ${dayjs(deliveryTime).tz(DEFAULT_TZ).format('DD-MM-YYYY HH:mm')}<br>`;
             if (packages.length > 0) {
-                html += `<b>Package:</b><ul class="detailed-list">`;
+                html += `<b>MENU PAKET:</b><ul class="detailed-list">`;
                 for (const pkg of packages) {
                     const mi = menuItems.find(m => m.id === pkg.menuId);
                     if (mi) {
@@ -1404,7 +1404,7 @@
                 html += `</ul>`;
             }
             if (alacarte.length > 0) {
-                html += `<b>Ala Carte:</b><ul class="detailed-list">`;
+                html += `<b>ALA CARTE:</b><ul class="detailed-list">`;
                 for (const ac of alacarte) {
                     const mi = menuItems.find(m => m.id === ac.menuId);
                     if (mi) {
@@ -1413,7 +1413,7 @@
                 }
                 html += `</ul>`;
             }
-            html += `<b>Notes:</b> ${notes || '-'}`;
+            html += `<b>CATATAN:</b> ${notes || '-'}`;
             document.getElementById('modal-summary-details').innerHTML = html;
             document.getElementById('modal-summary-total').innerHTML = `<span>Total Pembayaran: <b>¥${calcOrderTotal({packages,alacarte})}</b></span>`;
             document.getElementById('order-summary-modal').style.display = 'flex';
