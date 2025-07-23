@@ -21,25 +21,25 @@
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
     <style>
         :root {
-            --primary: #ff6d1a;
-            --primary-dark: #e34c00;
-            --secondary: #fff9e3;
-            --background: #fff9e3;
-            --background-dark: #3b2323;
-            --text: #312015;
-            --border: #ffe1c2;
+            --primary: #2396ef;          /* Soft blue for main accent */
+            --primary-dark: #184d72;     /* Deeper blue for contrast */
+            --secondary: #f6f7f9;        /* Very light gray for secondary background */
+            --background: #f3f6fb;       /* Gentle light blue/gray for main background */
+            --background-dark: #233043;  /* Muted dark blue for footer/dark areas */
+            --text: #2c3e50;             /* Soft dark gray for text */
+            --border: #d1dbe6;           /* Light gray for borders */
             --radius: 12px;
-            --shadow: 0 2px 12px rgba(60,20,20,0.08);
+            --shadow: 0 3px 12px rgba(44, 62, 80, 0.08);
             --font: 'Inter', sans-serif;
-            --warning-pending: #ffe1c2;
-            --warning-cooking: #ffe7b3;
-            --warning-ready: #b3ffe3;
-            --warning-completed: #e3d2ff;
-            --nav-active: #fff5df;
-            --action-btn: #ff6d1a;
-            --action-btn-hover: #e34c00;
-            --action-btn-pop-bg: #fff9e3;
-            --action-btn-pop-border: #ff6d1a;
+            --warning-pending: #ffefd5;      /* Pale orange for pending */
+            --warning-cooking: #ffe9b3;      /* Soft yellow for cooking */
+            --warning-ready: #c1f7ed;        /* Pale teal for ready */
+            --warning-completed: #d4f1c5;    /* Light green for completed */
+            --nav-active: #e3f0fc;           /* Very soft blue for nav */
+            --action-btn: #23b4a7;           /* Teal for action buttons */
+            --action-btn-hover: #1d8a7b;     /* Darker teal for hover */
+            --action-btn-pop-bg: #f6f7f9;
+            --action-btn-pop-border: #23b4a7;
         }
         html, body {
             min-height: 100%;
@@ -535,11 +535,11 @@
 <body>
     <header>
         <div class="logo-title">
-            <h1>CRI Admin</h1>
+            <h1>CRI WEB ORDER</h1>
         </div>
         <nav>
-            <button id="nav-admin" class="nav-btn active"><i class="fas fa-user-cog"></i> Admin Dashboard</button>
-            <button id="nav-kitchen" class="nav-btn"><i class="fas fa-utensils"></i> Kitchen Dashboard</button>
+            <button id="nav-admin" class="nav-btn active"><i class="fas fa-user-cog"></i> ADMIN</button>
+            <button id="nav-kitchen" class="nav-btn"><i class="fas fa-utensils"></i> DAPUR</button>
         </nav>
     </header>
     <div class="notification" id="notification"></div>
@@ -558,7 +558,7 @@
     <main class="container">
         <!-- Admin Dashboard Section -->
         <section id="admin-section" class="section card active">
-            <div class="section-title"><i class="fas fa-user-cog"></i> Admin Dashboard - Input Order</div>
+            <div class="section-title"><i class="fas fa-user-cog"></i> ADM - INPUT ORDER</div>
             <div id="edit-mode-bar" class="edit-mode-bar" style="display:none;">
                 <strong>Edit Order Mode</strong>
                 <span>You are editing order <span id="edit-order-id-bar"></span>. Make changes and click "Submit" to save, or "Cancel Edit" to discard changes.</span>
@@ -570,50 +570,50 @@
             <form id="order-form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="customer-name">Customer Name</label>
+                        <label for="customer-name">NAMA</label>
                         <input type="text" id="customer-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="delivery-time">Delivery Time</label>
+                        <label for="delivery-time">WAKTU ANTAR</label>
                         <input type="time" id="delivery-time" required>
                     </div>
                     <div class="form-group">
-                        <label for="delivery-location">Delivery Location</label>
+                        <label for="delivery-location">LOKASI</label>
                         <input type="text" id="delivery-location" required>
                     </div>
                 </div>
                 <div class="menu-section">
-                    <div class="section-title" onclick="toggleMenuSection('packages')" style="cursor:pointer"><i class="fas fa-list"></i> Packages <span id="package-toggle-icon">[ + ]</span></div>
+                    <div class="section-title" onclick="toggleMenuSection('packages')" style="cursor:pointer"><i class="fas fa-list"></i> MENU PAKET <span id="package-toggle-icon">[ + ]</span></div>
                     <div class="menu-list collapse" id="package-menu-list"></div>
                 </div>
                 <div class="menu-section">
-                    <div class="section-title" onclick="toggleMenuSection('alacarte')" style="cursor:pointer"><i class="fas fa-list"></i> Ala Carte <span id="alacarte-toggle-icon">[ + ]</span></div>
+                    <div class="section-title" onclick="toggleMenuSection('alacarte')" style="cursor:pointer"><i class="fas fa-list"></i> MENU SATUAN <span id="alacarte-toggle-icon">[ + ]</span></div>
                     <div class="menu-list collapse" id="alacarte-menu-list"></div>
                 </div>
                 <div class="form-group">
-                    <label for="order-notes">Additional Notes / Instructions (optional)</label>
+                    <label for="order-notes">CATATAN TAMBAHAN</label>
                     <textarea id="order-notes" rows="2"></textarea>
                 </div>
                 <button type="submit" class="btn" id="send-to-kitchen-btn" style="display:none;">Send to Kitchen</button>
             </form>
             <button type="button" class="btn floating-bottom-btn" id="floating-send-to-kitchen-btn">
-                <i class="fas fa-paper-plane"></i> Send to Kitchen
+                <i class="fas fa-paper-plane"></i> SUBMIT ORDER
             </button>
             <div class="divider"></div>
-            <div class="section-title"><i class="fas fa-list"></i> Orders to Kitchen</div>
+            <div class="section-title"><i class="fas fa-list"></i> PESANAN DI DAPUR</div>
             <div class="order-group" id="admin-orders-pending">
-                <div class="order-group-title pending">Belum Dimasak</div>
+                <div class="order-group-title pending">BELUM DIMASAK</div>
                 <div class="table-responsive">
                     <table id="admin-orders-table-pending">
                         <thead>
                             <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Details</th>
-                                <th>Delivery Time</th>
-                                <th>Status</th>
-                                <th>History</th>
-                                <th>Actions</th>
+                                <th>ID</th>
+                                <th>NAMA</th>
+                                <th>PESANAN</th>
+                                <th>WAKTU ANTAR</th>
+                                <th>STATUS</th>
+                                <th>HISTORY</th>
+                                <th>SET</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -621,17 +621,17 @@
                 </div>
             </div>
             <div class="order-group" id="admin-orders-cooking">
-                <div class="order-group-title cooking">Sedang Dimasak</div>
+                <div class="order-group-title cooking">SEDANG DIMASAK</div>
                 <div class="table-responsive">
                     <table id="admin-orders-table-cooking">
                         <thead>
                             <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Details</th>
-                                <th>Delivery Time</th>
-                                <th>Status</th>
-                                <th>History</th>
+                                <th>ID</th>
+                                <th>NAMA</th>
+                                <th>PESANAN</th>
+                                <th>WAKTU ANTAR</th>
+                                <th>STATUS</th>
+                                <th>HISTORY</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -639,17 +639,17 @@
                 </div>
             </div>
             <div class="order-group" id="admin-orders-ready">
-                <div class="order-group-title ready">Siap Diantar</div>
+                <div class="order-group-title ready">SIAP DIANTAR</div>
                 <div class="table-responsive">
                     <table id="admin-orders-table-ready">
                         <thead>
                             <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Details</th>
-                                <th>Delivery Time</th>
-                                <th>Status</th>
-                                <th>History</th>
+                                <th>ID</th>
+                                <th>NAMA</th>
+                                <th>PESANAN</th>
+                                <th>WAKTU ANTAR</th>
+                                <th>STATUS</th>
+                                <th>HISTORY</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -657,17 +657,17 @@
                 </div>
             </div>
             <div class="order-group" id="admin-orders-completed">
-                <div class="order-group-title completed">Selesai</div>
+                <div class="order-group-title completed">DONE!</div>
                 <div class="table-responsive">
                     <table id="admin-orders-table-completed">
                         <thead>
                             <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Details</th>
-                                <th>Delivery Time</th>
-                                <th>Status</th>
-                                <th>History</th>
+                                <th>ID</th>
+                                <th>NAMA</th>
+                                <th>PESANAN</th>
+                                <th>WAKTU ANTAR</th>
+                                <th>STATUS</th>
+                                <th>HISTORY</th>
                                 <th>Invoice</th>
                             </tr>
                         </thead>
@@ -678,27 +678,27 @@
         </section>
         <!-- Kitchen Dashboard Section -->
         <section id="kitchen-section" class="section card">
-            <div class="section-title"><i class="fas fa-utensils"></i> Kitchen Dashboard - Orders</div>
+            <div class="section-title"><i class="fas fa-utensils"></i> ORDERAN DAPUR</div>
             <div class="order-group" id="kitchen-orders-pending">
-                <div class="order-group-title pending">Belum Dimasak</div>
+                <div class="order-group-title pending">BELUM DIMASAK</div>
                 <div id="kitchen-pending-order-list"></div>
             </div>
             <div class="order-group" id="kitchen-orders-cooking">
-                <div class="order-group-title cooking">Sedang Dimasak</div>
+                <div class="order-group-title cooking">SEDANG DIMASAK</div>
                 <div id="kitchen-cooking-order-list"></div>
             </div>
             <div class="order-group" id="kitchen-orders-ready">
-                <div class="order-group-title ready">Siap Diantar</div>
+                <div class="order-group-title ready">SIAP DIANTAR</div>
                 <div id="kitchen-ready-order-list"></div>
             </div>
             <div class="order-group" id="kitchen-orders-completed">
-                <div class="order-group-title completed">Selesai</div>
+                <div class="order-group-title completed">DONE!</div>
                 <div id="kitchen-completed-order-list"></div>
             </div>
         </section>
         <!-- Reports & Export Section -->
         <section id="reports-section" class="section card">
-            <div class="section-title"><i class="fas fa-file-excel"></i> Reports & Excel Export</div>
+            <div class="section-title"><i class="fas fa-file-excel"></i> REPORTS</div>
             <div class="form-row">
                 <div class="form-group">
                     <label for="report-range">Report Date Range</label>
@@ -721,8 +721,8 @@
                     <thead>
                         <tr>
                             <th>Invoice ID</th>
-                            <th>Order ID</th>
-                            <th>Customer</th>
+                            <th>ID</th>
+                            <th>NAMA</th>
                             <th>Total Price</th>
                             <th>Completed Time</th>
                             <th>Download</th>
@@ -734,33 +734,33 @@
         </section>
         <!-- Menu Management Section -->
         <section id="menu-section" class="section card">
-            <div class="section-title"><i class="fas fa-book"></i> Menu Management</div>
+            <div class="section-title"><i class="fas fa-book"></i> ATUR EDIT MENU</div>
             <form id="menu-form">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="menu-type">Type</label>
                         <select id="menu-type">
-                            <option value="package">Package</option>
-                            <option value="alacarte">Ala Carte</option>
+                            <option value="package">MENU PAKET</option>
+                            <option value="alacarte">MENU SATUAN</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="menu-name">Menu Name</label>
+                        <label for="menu-name">NAMA MENU</label>
                         <input type="text" id="menu-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="menu-desc">Description</label>
+                        <label for="menu-desc">DETAIL</label>
                         <input type="text" id="menu-desc">
                     </div>
                     <div class="form-group">
-                        <label for="menu-price">Price (¥)</label>
+                        <label for="menu-price">HARGA (¥)</label>
                         <input type="number" min="0" id="menu-price" required>
                     </div>
                 </div>
-                <button type="submit" class="btn"><i class="fas fa-plus"></i> Add Menu Item</button>
+                <button type="submit" class="btn"><i class="fas fa-plus"></i> TAMBAH MENU</button>
             </form>
             <div class="divider"></div>
-            <div class="section-title"><i class="fas fa-list"></i> Current Menu Items</div>
+            <div class="section-title"><i class="fas fa-list"></i> MENU YANG SUDAH ADA</div>
             <div class="table-responsive">
                 <table id="menu-table">
                     <thead>
@@ -769,7 +769,7 @@
                             <th>Name</th>
                             <th>Description</th>
                             <th>Price</th>
-                            <th>Actions</th>
+                            <th>SET</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -779,8 +779,8 @@
     </main>
     <footer class="footer">
         <div class="footer-buttons">
-            <button id="footer-reports" class="footer-btn"><i class="fas fa-file-excel"></i> Reports & Export</button>
-            <button id="footer-menu" class="footer-btn"><i class="fas fa-book"></i> Menu Management</button>
+            <button id="footer-reports" class="footer-btn"><i class="fas fa-file-excel"></i> REPORT</button>
+            <button id="footer-menu" class="footer-btn"><i class="fas fa-book"></i> ATUR EDIT MENU</button>
         </div>
     </footer>
     <script>
