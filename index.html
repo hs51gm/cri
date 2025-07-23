@@ -1595,8 +1595,8 @@
             if (!ord) return;
             let msg = '👋🏻 Siap Diantar 👋🏻\n\n';
             msg += `Orderan #${ord.id}\n\n`;
-            msg += `Nama Customer: ${ord.customer}\nLocation: ${ord.deliveryLocation}\nDelivery Time: ${formatDateTime(ord.deliveryTime)}\n\n`;
-            msg += `Order:\n`;
+            msg += `Nama: ${ord.customer}\nAlamat: ${ord.deliveryLocation}\nWaktu Antar: ${formatDateTime(ord.deliveryTime)}\n\n`;
+            msg += `Pesanan:\n`;
             for (const pkg of ord.packages) {
                 const mi = menuItems.find(m => m.id === pkg.menuId);
                 if (mi) {
@@ -1614,8 +1614,8 @@
                     msg += `- ${mi.name} x${ac.qty}\n`;
                 }
             }
-            msg += `Notes: ${ord.notes || '-'}\n\n`;
-            msg += `Total: ¥${calcOrderTotal(ord)}\n`;
+            msg += `Catatan: ${ord.notes || '-'}\n\n`;
+            msg += `Total Bayar: ¥${calcOrderTotal(ord)}\n`;
             const botToken = "7977280306:AAFG8qAVnSD81p73iFP3wRceOP-605auqQ0";
             const chatId = "-1002880911209";
             fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
