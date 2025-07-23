@@ -1388,7 +1388,7 @@
             }
             let html = `<b>NAMA:</b> ${customer}<br>`;
             html += `<b>ALAMAT:</b> ${deliveryLocation}<br>`;
-            html += `<b>WAKTU ANTAR:</b> ${dayjs(deliveryTime).tz(DEFAULT_TZ).format('DD-MM-YYYY HH:mm')}<br>`;
+            html += `<b>WAKTU ANTAR:</b> ${dayjs(deliveryTime).tz(DEFAULT_TZ).format('DD-MM-YYYY HH:mm')}<br><br>`;
             if (packages.length > 0) {
                 html += `<b>MENU PAKET:</b><ul class="detailed-list">`;
                 for (const pkg of packages) {
